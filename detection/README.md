@@ -70,6 +70,12 @@ gradient-boosting implementation is not bit-stable across minor versions, so
 regenerating `results/` exactly requires the pins. Under a different sklearn the
 findings replicate; the CSVs will differ in the last digits.
 
+The *Python* version is looser than the library pins: independently checked on
+3.12 and 3.14 with the pinned libraries, `results_*.csv`, `summary.json`,
+`degeneracy_audit_*.json` and every `tost_*.json` match exactly. Only the raw
+per-entity out-of-fold logit scores in `oof_*.csv` drift, at 1e-9--1e-14, which
+reaches no reported figure.
+
 Outputs in `results/`: `results_{world}.csv` (AUC/AP + 95% clustered CIs
 per tier per model), `oof_{world}.csv` (per-entity out-of-fold scores —
 the TOST input), `degeneracy_audit_{world}.json`,
