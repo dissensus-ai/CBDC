@@ -782,7 +782,7 @@ International standards (FATF, BIS) should accommodate privacy-preserving archit
 
 This paper has focused on conceptual architecture rather than complete technical specification. Implementation details---specific protocol designs, performance benchmarks, user interface considerations---require further development.
 
-The framework's core assumption---that pattern detection can effectively identify illicit transactions without identity information---has been validated through agent-based simulation (Section 4.5). Results confirm that graph-only approaches achieve 87--95\% of surveillance-based detection performance, with the gap driven primarily by cross-wallet activity dilution rather than lack of surveillance data. More significantly, watchlist access provides zero marginal improvement under the conditions tested, suggesting that the surveillance apparatus justifying identity-linked monitoring adds limited detection value beyond what pseudonymous linking achieves. The detection-simulation validation code is included in the submission supplement and will be merged into the paper's public code repository (\url{https://github.com/andrewmaksakov/CBDC}), which currently hosts the PET--AML stack simulation of Section~5.4.
+The framework's core assumption---that pattern detection can effectively identify illicit transactions without identity information---has been validated through agent-based simulation (Section 4.5). Results confirm that graph-only approaches achieve 87--95\% of surveillance-based detection performance, with the gap driven primarily by cross-wallet activity dilution rather than lack of surveillance data. More significantly, watchlist access provides zero marginal improvement under the conditions tested, suggesting that the surveillance apparatus justifying identity-linked monitoring adds limited detection value beyond what pseudonymous linking achieves. The detection-simulation validation code is available in the paper's public code repository (\url{https://github.com/andrewmaksakov/CBDC}, \texttt{detection/}), alongside the PET--AML stack simulation of Section~5.4 (\texttt{pet\_aml\_sim.py}).
 
 Several limitations merit acknowledgment. First, the simulation models relatively unsophisticated laundering behavior; real-world sophisticated actors may exhibit different evasion patterns. Second, the 500/50 legitimate/launderer ratio, while reasonable for simulation, may not reflect actual prevalence rates. Third, graph topology features depend on network structure that may differ in deployed CBDC systems.
 
@@ -821,10 +821,10 @@ This paper has attempted to expand the design space by demonstrating that altern
 \paragraph{Funding.} This research received no external funding.
 
 \paragraph{Data Availability.} Simulation code for the PET--AML stack
-validation (Section~5.4) is available at
-\url{https://github.com/andrewmaksakov/CBDC}. The detection-simulation
-validation code (Section~4.5) is included in the submission supplement
-and will be merged into the same repository.
+validation (Section~5.4, \texttt{pet\_aml\_sim.py}) and the
+detection-simulation validation pipeline (Section~4.5, \texttt{detection/})
+are both available at
+\url{https://github.com/andrewmaksakov/CBDC}.
 
 \paragraph{AI Assistance.} Claude (Anthropic) was used as a research
 collaborator for analytical framework development, literature synthesis,
