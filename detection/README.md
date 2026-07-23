@@ -62,9 +62,13 @@ python3 run_all.py --seed 42           # any seed; all numbers regenerate
 python3 degeneracy_audit.py [seed]     # gate only
 ```
 
-Environment: Python 3.14, numpy 2.3.5, scipy 1.16.3, scikit-learn 1.8.0,
-pandas 2.3.3. Runtime ≈ 30 s. Every random draw flows from the single
-`--seed` (DGP, folds, models, bootstraps).
+Environment: pinned in `requirements.txt` (Python 3.14, numpy 2.3.5,
+scipy 1.16.3, scikit-learn 1.8.0, pandas 2.3.3). Runtime ≈ 30 s. Every random
+draw flows from the single `--seed` (DGP, folds, models, bootstraps) — but
+seeding alone is not enough for *byte*-identical output: scikit-learn's
+gradient-boosting implementation is not bit-stable across minor versions, so
+regenerating `results/` exactly requires the pins. Under a different sklearn the
+findings replicate; the CSVs will differ in the last digits.
 
 Outputs in `results/`: `results_{world}.csv` (AUC/AP + 95% clustered CIs
 per tier per model), `oof_{world}.csv` (per-entity out-of-fold scores —

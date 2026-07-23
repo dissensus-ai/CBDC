@@ -1,0 +1,13 @@
+# Exact environment the committed results/ were generated under (seed 20260707).
+# Byte-identical regeneration of results/ requires these pins: scikit-learn's
+# gradient-boosting implementation is not bit-stable across minor versions, so a
+# different sklearn reproduces the findings but not the committed CSVs.
+#
+#   python3 -m venv .venv && . .venv/bin/activate
+#   pip install -r requirements.txt && python3 run_all.py
+#
+# Python 3.14.0
+numpy==2.3.5
+scipy==1.16.3
+scikit-learn==1.8.0
+pandas==2.3.3
