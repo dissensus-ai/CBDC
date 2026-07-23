@@ -441,8 +441,23 @@ class PETAMLSimulator:
         txs = self.generate_transactions()
 
         edges_by_day: Dict[int, List[Tuple[int, int, float]]] = {}
+        total_batch_hours = 0.0
 
+        cur_day = None
         for tx in txs:
+            day = int(tx.t_arrival // (24 * 3600))
+            if cur_day is not None and day != cur_day:
+                # Run risk propagation on the day just finished so its output
+                # (payer.risk_tier) is visible to transactions in the NEXT day,
+                # not just to the post-hoc histogram. Without this, risk_tier
+                # stays at its Wallet default (0) for every read inside the
+                # loop below, and risk-tier-based escalation can never fire.
+                day_edges = edges_by_day.get(cur_day, [])
+                total_batch_hours += self.mpc.batch_runtime_hours(len(day_edges))
+                self.mpc.run_batch(self.wallets, day_edges)
+            cur_day = day
+
+
             payer = self.wallets[tx.payer]
 
             t = tx.t_arrival
@@ -493,10 +508,10 @@ class PETAMLSimulator:
                 res.rejected += 1
                 res.rejected_reasons[reason] = res.rejected_reasons.get(reason, 0) + 1
 
-        total_batch_hours = 0.0
-        for _, edges in edges_by_day.items():
-            total_batch_hours += self.mpc.batch_runtime_hours(len(edges))
-            self.mpc.run_batch(self.wallets, edges)
+        if cur_day is not None:
+            day_edges = edges_by_day.get(cur_day, [])
+            total_batch_hours += self.mpc.batch_runtime_hours(len(day_edges))
+            self.mpc.run_batch(self.wallets, day_edges)
 
         res.mpc_batch_hours = total_batch_hours
         for w in self.wallets.values():
