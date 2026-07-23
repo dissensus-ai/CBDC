@@ -1,0 +1,138 @@
+"""Driver: regenerates every number in the detection pipeline.
+
+    python3 run_all.py [--seed 20260707] [--n-entities 800] [--delta 0.03]
+
+Order of operations (the audit is a HARD GATE — nothing downstream runs
+if it fails):
+
+  1. default world: DGP -> features -> degeneracy audit (gate) ->
+     four-tier experiment -> label-permutation negative control ->
+     TOST T2 vs T4 (and T2 vs T3).
+  2. falsification demo: the surveillance_strong world, where identity
+     and watchlist are genuinely informative. The TOST must come out
+     NOT-equivalent here (SURVEILLANCE_SUPERIOR expected) — proof the
+     harness is not rigged toward the paper's thesis.
+
+Everything lands in results/: results_default.csv, oof_default.csv,
+degeneracy_audit_{default,surveillance_strong}.json, tost_*.json,
+summary.json.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+
+from data_loaders import load_synthetic
+from degeneracy_audit import DegeneracyError, audit, print_report
+from detection_experiment import (label_permutation_control, run_experiment)
+from dgp import DGPConfig, default_config, surveillance_strong_config
+from equivalence_test import print_tost, tost_equivalence
+from features import (T1_WALLET_COLS, TIER_COLS, build_entity_features,
+                      build_wallet_features)
+
+RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                           "results")
+
+
+def run_world(cfg: DGPConfig, delta: float, run_controls: bool) -> dict:
+    label = cfg.label
+    print(f"\n=== world: {label} (seed={cfg.seed}, "
+          f"n_entities={cfg.n_entities}) ===")
+    data = load_synthetic(cfg)
+    tx = data["transactions"]
+    print(f"generated {len(tx)} transactions, "
+          f"{len(data['wallets'])} wallets, "
+          f"{data['entities'].is_launderer.sum()} launderers")
+
+    wf = build_wallet_features(data)
+    ef = build_entity_features(data, wf)
+
+    # gate: degeneracy audit (raises + aborts on failure)
+    rep = audit(ef, wf, TIER_COLS, T1_WALLET_COLS)
+    print_report(rep)
+    with open(f"{RESULTS_DIR}/degeneracy_audit_{label}.json", "w") as f:
+        json.dump(rep, f, indent=2)
+
+    results, oof = run_experiment(data, wf, ef, cfg.seed)
+    results.to_csv(f"{RESULTS_DIR}/results_{label}.csv", index=False)
+    oof.to_csv(f"{RESULTS_DIR}/oof_{label}.csv", index=False)
+    print("\nfour-tier results (entity-level, clustered bootstrap 95% CI):")
+    for _, r in results.iterrows():
+        print(f"  {r.model:6s} {r.tier}: AUC {r.auc:.3f} "
+              f"[{r.auc_ci_lo:.3f}, {r.auc_ci_hi:.3f}]   "
+              f"AP {r.ap:.3f} [{r.ap_ci_lo:.3f}, {r.ap_ci_hi:.3f}]")
+
+    world = {"config": cfg.to_dict(), "audit": {k: rep[k] for k in
+             ("gate1_pass", "gate2_pass", "worst_feature", "worst_auc")},
+             "results": results.to_dict("records"), "tost": {}}
+
+    if run_controls:
+        perm_auc = label_permutation_control(data, wf, ef, cfg.seed)
+        print(f"\nlabel-permutation negative control (T4 gboost): "
+              f"AUC = {perm_auc:.3f} (expect ~0.5)")
+        world["label_permutation_auc"] = perm_auc
+
+    print()
+    for model in ("logit", "gboost"):
+        for hi in ("T3", "T4"):
+            res = tost_equivalence(oof, tier_lo="T2", tier_hi=hi,
+                                   model=model, delta=delta, seed=cfg.seed)
+            print_tost(res)
+            world["tost"][f"T2_vs_{hi}_{model}"] = res
+            with open(f"{RESULTS_DIR}/tost_{label}_T2_vs_{hi}_{model}.json",
+                      "w") as f:
+                json.dump(res, f, indent=2)
+    return world
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, default=20260707)
+    ap.add_argument("--n-entities", type=int, default=800)
+    ap.add_argument("--delta", type=float, default=0.03,
+                    help="pre-registered TOST equivalence margin (AUC)")
+    args = ap.parse_args()
+    os.makedirs(RESULTS_DIR, exist_ok=True)
+
+    summary = {"seed": args.seed, "delta": args.delta, "worlds": {}}
+
+    cfg = default_config(args.seed)
+    cfg.n_entities = args.n_entities
+    try:
+        summary["worlds"]["default"] = run_world(cfg, args.delta,
+                                                 run_controls=True)
+    except DegeneracyError as e:
+        print(str(e))
+        sys.exit(1)
+
+    strong = surveillance_strong_config(args.seed)
+    strong.n_entities = args.n_entities
+    try:
+        summary["worlds"]["surveillance_strong"] = run_world(
+            strong, args.delta, run_controls=False)
+    except DegeneracyError as e:
+        print(str(e))
+        sys.exit(1)
+
+    with open(f"{RESULTS_DIR}/summary.json", "w") as f:
+        json.dump(summary, f, indent=2)
+
+    strong_verdicts = {k: v["verdict"] for k, v in
+                       summary["worlds"]["surveillance_strong"]["tost"].items()}
+    print("\n=== harness self-check ===")
+    print("surveillance_strong TOST verdicts (must NOT all be EQUIVALENT, "
+          "expect SURVEILLANCE_SUPERIOR):")
+    for k, v in strong_verdicts.items():
+        print(f"  {k}: {v}")
+    if all(v == "EQUIVALENT" for v in strong_verdicts.values()):
+        print("WARNING: harness returned EQUIVALENT on a world built to "
+              "falsify the thesis — the harness is rigged, do not use.")
+        sys.exit(2)
+    print("\nall results written to results/")
+
+
+if __name__ == "__main__":
+    main()

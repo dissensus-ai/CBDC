@@ -1,0 +1,415 @@
+{
+  "seed": 20260707,
+  "delta": 0.03,
+  "worlds": {
+    "default": {
+      "config": {
+        "seed": 20260707,
+        "n_entities": 800,
+        "base_rate": 0.05,
+        "sim_days": 120.0,
+        "obfuscation": 0.6,
+        "reporting_threshold": 10000.0,
+        "n_external": 3000,
+        "wallet_count_p": 0.3,
+        "cycles_per_120d": 3.0,
+        "placement_mu": 8.25,
+        "placement_sigma": 0.6,
+        "smurf_prob": 0.6,
+        "watchlist_tpr": 0.4,
+        "watchlist_fpr": 0.02,
+        "sar_lambda_launderer": 0.4,
+        "sar_lambda_legit": 0.1,
+        "kyc_low_prob_launderer": 0.45,
+        "kyc_low_prob_legit": 0.3,
+        "juris_beta_launderer": [
+          2.4,
+          4.0
+        ],
+        "juris_beta_legit": [
+          2.0,
+          5.0
+        ],
+        "acct_age_mu_launderer": 5.9,
+        "acct_age_mu_legit": 6.3,
+        "acct_age_sigma": 0.7,
+        "label": "default"
+      },
+      "audit": {
+        "gate1_pass": true,
+        "gate2_pass": true,
+        "worst_feature": "w_frac_fast_mean",
+        "worst_auc": 0.886935909477168
+      },
+      "results": [
+        {
+          "model": "logit",
+          "tier": "T1",
+          "auc": 0.9149335837917618,
+          "auc_ci_lo": 0.818498842374824,
+          "auc_ci_hi": 0.9793977785111239,
+          "ap": 0.7224357710706422,
+          "ap_ci_lo": 0.5367288734959799,
+          "ap_ci_hi": 0.8713212014588362,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "logit",
+          "tier": "T2",
+          "auc": 0.9444966232836889,
+          "auc_ci_lo": 0.8960933542707428,
+          "auc_ci_hi": 0.9824251863073108,
+          "ap": 0.7684561526670369,
+          "ap_ci_lo": 0.6189515368157031,
+          "ap_ci_hi": 0.8972042245605426,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "logit",
+          "tier": "T3",
+          "auc": 0.9790688313430833,
+          "auc_ci_lo": 0.9569696549133077,
+          "auc_ci_hi": 0.9942627970880211,
+          "ap": 0.7925555745837908,
+          "ap_ci_lo": 0.6376929789905557,
+          "ap_ci_hi": 0.9041960756733475,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "logit",
+          "tier": "T4",
+          "auc": 0.9857328145265889,
+          "auc_ci_lo": 0.9723073773680322,
+          "auc_ci_hi": 0.9958193548387098,
+          "ap": 0.8209777285949102,
+          "ap_ci_lo": 0.6811214996034765,
+          "ap_ci_hi": 0.925838194352791,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T1",
+          "auc": 0.9355516794132117,
+          "auc_ci_lo": 0.8491440308649235,
+          "auc_ci_hi": 0.9939914268053063,
+          "ap": 0.8327378923442996,
+          "ap_ci_lo": 0.694350900852097,
+          "ap_ci_hi": 0.9383600219603606,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T2",
+          "auc": 0.9877007021780938,
+          "auc_ci_lo": 0.9671845461365342,
+          "auc_ci_hi": 0.9984899844566157,
+          "ap": 0.8966844535210594,
+          "ap_ci_lo": 0.7925350245599635,
+          "ap_ci_hi": 0.9679681868852742,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T3",
+          "auc": 0.9919942752359229,
+          "auc_ci_lo": 0.9792590311276688,
+          "auc_ci_hi": 0.9988820777489092,
+          "ap": 0.9142647135571785,
+          "ap_ci_lo": 0.8187412603741142,
+          "ap_ci_hi": 0.9754921178417133,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T4",
+          "auc": 0.9919942752359229,
+          "auc_ci_lo": 0.9792590311276688,
+          "auc_ci_hi": 0.9988820777489092,
+          "ap": 0.9142647135571785,
+          "ap_ci_lo": 0.8187412603741142,
+          "ap_ci_hi": 0.9754921178417133,
+          "n_entities": 800,
+          "n_launderers": 29
+        }
+      ],
+      "tost": {
+        "T2_vs_T3_logit": {
+          "comparison": "T3 vs T2 (logit)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.03457220805939443,
+          "dAUC_ci90": [
+            0.00540290695467508,
+            0.06798413358333551
+          ],
+          "boot_frac_above_margin": 0.543,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "INCONCLUSIVE"
+        },
+        "T2_vs_T4_logit": {
+          "comparison": "T4 vs T2 (logit)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.04123619124290001,
+          "dAUC_ci90": [
+            0.011642667469986984,
+            0.0764361898782014
+          ],
+          "boot_frac_above_margin": 0.6855,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "INCONCLUSIVE"
+        },
+        "T2_vs_T3_gboost": {
+          "comparison": "T3 vs T2 (gboost)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.00429357305782907,
+          "dAUC_ci90": [
+            0.000361814516129122,
+            0.010148579844475874
+          ],
+          "boot_frac_above_margin": 0.0,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "EQUIVALENT"
+        },
+        "T2_vs_T4_gboost": {
+          "comparison": "T4 vs T2 (gboost)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.00429357305782907,
+          "dAUC_ci90": [
+            0.000361814516129122,
+            0.010148579844475874
+          ],
+          "boot_frac_above_margin": 0.0,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "EQUIVALENT"
+        }
+      },
+      "label_permutation_auc": 0.4072632944228275
+    },
+    "surveillance_strong": {
+      "config": {
+        "seed": 20260707,
+        "n_entities": 800,
+        "base_rate": 0.05,
+        "sim_days": 120.0,
+        "obfuscation": 0.95,
+        "reporting_threshold": 10000.0,
+        "n_external": 3000,
+        "wallet_count_p": 0.3,
+        "cycles_per_120d": 1.5,
+        "placement_mu": 7.9,
+        "placement_sigma": 0.6,
+        "smurf_prob": 0.6,
+        "watchlist_tpr": 0.72,
+        "watchlist_fpr": 0.02,
+        "sar_lambda_launderer": 1.2,
+        "sar_lambda_legit": 0.05,
+        "kyc_low_prob_launderer": 0.7,
+        "kyc_low_prob_legit": 0.2,
+        "juris_beta_launderer": [
+          3.5,
+          3.0
+        ],
+        "juris_beta_legit": [
+          1.8,
+          5.0
+        ],
+        "acct_age_mu_launderer": 5.9,
+        "acct_age_mu_legit": 6.3,
+        "acct_age_sigma": 0.7,
+        "label": "surveillance_strong"
+      },
+      "audit": {
+        "gate1_pass": true,
+        "gate2_pass": true,
+        "worst_feature": "jurisdiction_risk",
+        "worst_auc": 0.874189364461738
+      },
+      "results": [
+        {
+          "model": "logit",
+          "tier": "T1",
+          "auc": 0.8520506283823068,
+          "auc_ci_lo": 0.7546167910405476,
+          "auc_ci_hi": 0.9341244264247844,
+          "ap": 0.4508606699024252,
+          "ap_ci_lo": 0.29142619129184255,
+          "ap_ci_hi": 0.6156487482924448,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "logit",
+          "tier": "T2",
+          "auc": 0.8160472293036362,
+          "auc_ci_lo": 0.7299815793236357,
+          "auc_ci_hi": 0.8956957209226561,
+          "ap": 0.3692362403924612,
+          "ap_ci_lo": 0.1987531063095758,
+          "ap_ci_hi": 0.5553540484184806,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "logit",
+          "tier": "T3",
+          "auc": 0.9872981797039224,
+          "auc_ci_lo": 0.9756150726676098,
+          "auc_ci_hi": 0.9960837466615124,
+          "ap": 0.8414676317745675,
+          "ap_ci_lo": 0.7239428817515295,
+          "ap_ci_hi": 0.936157024994114,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "logit",
+          "tier": "T4",
+          "auc": 0.9920837246746277,
+          "auc_ci_lo": 0.9835268656214251,
+          "auc_ci_hi": 0.9982762731876854,
+          "ap": 0.9023375562534555,
+          "ap_ci_lo": 0.803326267241865,
+          "ap_ci_hi": 0.9722733427199198,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T1",
+          "auc": 0.8847891229482535,
+          "auc_ci_lo": 0.8025297992344828,
+          "auc_ci_hi": 0.954846517136193,
+          "ap": 0.5034664834359884,
+          "ap_ci_lo": 0.3323437922398885,
+          "ap_ci_hi": 0.6660921401631019,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T2",
+          "auc": 0.9253097186815152,
+          "auc_ci_lo": 0.8361865234374999,
+          "auc_ci_hi": 0.9856795668230328,
+          "ap": 0.7727117173407625,
+          "ap_ci_lo": 0.6226802756547026,
+          "ap_ci_hi": 0.8904965229080257,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T3",
+          "auc": 0.9965561966098663,
+          "auc_ci_lo": 0.9927166780399183,
+          "auc_ci_hi": 0.9990872920571697,
+          "ap": 0.9299034522722249,
+          "ap_ci_lo": 0.8562132673687654,
+          "ap_ci_hi": 0.9808623994228282,
+          "n_entities": 800,
+          "n_launderers": 29
+        },
+        {
+          "model": "gboost",
+          "tier": "T4",
+          "auc": 0.996869269645333,
+          "auc_ci_lo": 0.9928789716863239,
+          "auc_ci_hi": 0.9993078883513666,
+          "ap": 0.9392808738599454,
+          "ap_ci_lo": 0.8653413107670538,
+          "ap_ci_hi": 0.9846730030115609,
+          "n_entities": 800,
+          "n_launderers": 29
+        }
+      ],
+      "tost": {
+        "T2_vs_T3_logit": {
+          "comparison": "T3 vs T2 (logit)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.17125095040028626,
+          "dAUC_ci90": [
+            0.10525735116798007,
+            0.2391722958628945
+          ],
+          "boot_frac_above_margin": 1.0,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "SURVEILLANCE_SUPERIOR"
+        },
+        "T2_vs_T4_logit": {
+          "comparison": "T4 vs T2 (logit)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.17603649537099153,
+          "dAUC_ci90": [
+            0.10986058990770194,
+            0.24376849119992525
+          ],
+          "boot_frac_above_margin": 1.0,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "SURVEILLANCE_SUPERIOR"
+        },
+        "T2_vs_T3_gboost": {
+          "comparison": "T3 vs T2 (gboost)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.07124647792835104,
+          "dAUC_ci90": [
+            0.018575278267809036,
+            0.13771385291348281
+          ],
+          "boot_frac_above_margin": 0.8715,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "INCONCLUSIVE"
+        },
+        "T2_vs_T4_gboost": {
+          "comparison": "T4 vs T2 (gboost)",
+          "delta_margin": 0.03,
+          "alpha": 0.05,
+          "n_boot": 2000,
+          "n_entities": 800,
+          "n_launderers": 29,
+          "dAUC_point": 0.07155955096381772,
+          "dAUC_ci90": [
+            0.018971641669000262,
+            0.13789371763251945
+          ],
+          "boot_frac_above_margin": 0.876,
+          "boot_frac_below_neg_margin": 0.0,
+          "verdict": "INCONCLUSIVE"
+        }
+      }
+    }
+  }
+}

@@ -21,6 +21,15 @@
 # PDF output (rebuild from source)
 *.pdf
 
+# Seeded run records are results, not build noise
+!detection/results/*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
 # Editor files
 *.swp
 *.swo

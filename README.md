@@ -1,62 +1,123 @@
 # Privacy-Preserving Financial Surveillance: An Architectural Framework for CBDC Implementation
 
-**Preprint v1.1.0 | January 2026**
-
 Murad Farzulla — [Farzulla Research](https://farzulla.org) — [ORCID](https://orcid.org/0009-0002-7164-8704)
 
-Andrew Maksakov — Research Assistant & Technical Engineer 
+Andrew Maksakov — Dissensus AI (Section 5.4, PET-AML stack)
 
-**DOI:** [10.5281/zenodo.17917938](https://doi.org/10.5281/zenodo.17917938)
+**Preprint DOI:** [10.5281/zenodo.17917938](https://doi.org/10.5281/zenodo.17917938)
 
 ## Abstract
 
-This paper challenges the assumption that comprehensive transaction surveillance is necessary for CBDC financial stability and crime prevention. It proposes an alternative architecture achieving 87–95% of surveillance-based detection effectiveness while preserving complete transactional privacy. The framework operates through anonymized pattern detection, transaction-level intervention, and opt-in deanonymization — demonstrating that the surveillance–security trade-off is a false dichotomy.
+This paper challenges the assumption that comprehensive transaction surveillance is necessary for CBDC financial stability and crime prevention. It proposes an alternative architecture built on anonymized pattern detection, transaction-level intervention, and opt-in deanonymization, and argues that the surveillance–privacy trade-off is weaker than CBDC design documents assume.
 
-## Repository Structure
+## Status (July 2026)
 
-```
-main.tex          # LaTeX source
-references.bib    # BibTeX bibliography
-pet_aml_sim.py    # PET AML stack simulation (Section 5.4)
-```
+The Zenodo record above is the January **v1.1.0** deposit. It predates the merge of
+Section 5.4 (v2.0.0, February) and the July revision passes; a re-deposit is pending.
 
-## Simulation
+Two things are in flight and are **not** reflected in the `main.tex` on this branch:
 
-The `pet_aml_sim.py` script simulates the PET AML stack described in Section 5.4, including PSI watchlist screening, ZK policy proof generation/verification, secure MPC risk propagation, and queueing delays. No external dependencies — pure Python 3.
-
-```bash
-python pet_aml_sim.py --days 2 --tx-per-day 20000 --psps 8 --seed 7
-```
-
-Run `python pet_aml_sim.py --help` for all options.
-
-## Building the Paper
-
-Requires a LaTeX distribution (e.g., TeX Live, MiKTeX) with `pdflatex`, `bibtex`, and standard packages.
+1. **Section 4.5 is being rewritten.** The original §4.5 "validation" reported
+   AUC = 1.000 with watchlist access adding zero marginal value. That was a data-generating
+   artifact — launderers were *defined* to hold 3–6 wallets against 1–2, so `num_wallets`
+   separated the classes by construction. `detection/` (below) is the honest replacement
+   harness. The manuscript's headline numbers still quote the old figures until the rewrite
+   lands.
+2. **Positioning pass, 21 July.** The §2.4 gap claim was falsified against a 30-year
+   cryptographic-compliance lineage (trustee e-cash → Compact E-Cash → GGM16 →
+   Platypus/PEReDi → Privacy Pools) plus BIS Aurora/Hertha, and the paper was repositioned
+   around what survives. Full change log and the revised manuscript are on the
+   **`jul2026-working`** branch (`CHANGES-FOR-ANDREW.md`, `FORWARD_NOTE.md`).
 
 ```bash
-pdflatex main
-bibtex main
-pdflatex main
-pdflatex main
+git checkout jul2026-working   # current manuscript + compiled PDF + change logs
 ```
 
-**Note:** The document references `farzulla-logo.pdf` and `zenodo-logo.pdf` logo files which are not included in this repository. Comment out or replace the `\farzullalogo` and `\zenodologo` commands in `main.tex` if building without them.
+Target venue: MDPI *FinTech*, regular track, mid-September.
+
+## Repository structure
+
+```
+main.tex             # LaTeX source (stale February version on main; current on jul2026-working)
+references.bib       # bibliography — corrected July 2026, see below
+pet_aml_sim.py       # PET-AML stack simulation (Section 5.4)
+detection/           # Section 4.5 detection-validation pipeline
+```
+
+## `detection/` — Section 4.5 validation pipeline
+
+Self-contained, seeded, and gated. Four evidence tiers (T1 structure-only on unlinked
+pseudonyms → T2 + pseudonymous linkage → T3 + identity attributes → T4 + watchlist), with
+entity-disjoint cross-validation, entity-clustered bootstrap CIs, a label-permutation
+negative control, and a TOST equivalence test for the paper's T2 ≈ T4 claim.
+
+A **pre-registered degeneracy audit** runs before any headline number and hard-fails if any
+single feature reaches entity-level AUC > 0.95. Run it against the original DGP and it fails
+on `num_wallets` at 1.000; on the shipped DGP the worst feature sits ≈ 0.84–0.92.
+
+```bash
+cd detection/
+python3 run_all.py                  # seed 20260707, 800 entities, δ = 0.03 — ≈40 s
+python3 run_all.py --seed 42        # every number regenerates from the one seed
+python3 test_pipeline.py            # regression tests
+```
+
+Requires Python 3.11+ with `numpy`, `scipy`, `scikit-learn`, `pandas` (developed on 3.14 /
+numpy 2.3.5 / scipy 1.16.3 / sklearn 1.8.0 / pandas 2.3.3). The committed `results/` were
+regenerated byte-identically on a clean checkout — if your run differs, the environment
+differs, and that's worth knowing before we quote anything.
+
+Reference numbers, real-data adapters (AMLworld, Elliptic) and the honest read of what these
+synthetic results do and do not license: `detection/README.md`.
+
+## `pet_aml_sim.py` — Section 5.4 PET-AML stack
+
+PSI watchlist screening, ZK policy proof generation/verification, secure MPC risk
+propagation, queueing delays. Pure Python 3, no dependencies.
+
+```bash
+python3 pet_aml_sim.py --days 2 --tx-per-day 20000 --psps 8 --seed 7
+```
+
+**Known issue (Andrew's call):** `risk_tier` is read inside the transaction loop (travel-rule
+check and escalation, ~lines 468/475) but only assigned by `run_batch` risk propagation
+*after* the loop completes — so tier-based escalation can never fire, and the "zero
+escalations" result is guaranteed by construction rather than by the architecture. §5.4.3 has
+been reworded to say exactly that in the interim. A fix plus a seeded rerun (and a look at the
+36.8% rejection-rate calibration) would let Table 3 carry an honest escalation number.
+
+## References
+
+`references.bib` was corrected in July 2026. Five entries in the February version carried
+fabricated author sets (`OfflineCBDC2024`, `ZKPSurvey2025`, `UFLaw2024`, `OxfordCBDCSurvey2025`,
+`Koti2024Graphiti`); all are now verified against Crossref / IACR ePrint / publisher records,
+along with fixes to `Campanelli2019` (was `Campanelli2017`), `Wang2025UnbalancedPSI`,
+`choi2025cbdcprivacy`, and the `ECBConsultation2021` note. Eight entries were appended for the
+positioning pass. Rationale per entry: `FORWARD_NOTE.md` on `jul2026-working`.
+
+## Building the paper
+
+Plain `article` class, no local `.cls` and no external graphics — `main.tex` and
+`references.bib` are all you need.
+
+```bash
+pdflatex main && bibtex main && pdflatex main && pdflatex main
+```
 
 ## License
 
 - **Paper content:** [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/)
-- **Repository:** [MIT](LICENSE)
+- **Code:** [MIT](LICENSE)
 
 ## Citation
 
 ```bibtex
-@article{Farzulla2026CBDC,
-  author  = {Farzulla, Murad},
-  title   = {Privacy-Preserving Financial Surveillance: An Architectural Framework for {CBDC} Implementation},
-  journal = {Farzulla Research Preprint},
-  year    = {2026},
-  doi     = {10.5281/zenodo.17917938},
-  note    = {Preprint v1.1.0}
+@misc{FarzullaMaksakov2026CBDC,
+  author = {Farzulla, Murad and Maksakov, Andrew},
+  title  = {Privacy-Preserving Financial Surveillance: An Architectural
+            Framework for {CBDC} Implementation},
+  year   = {2026},
+  doi    = {10.5281/zenodo.17917938},
+  note   = {Preprint}
 }
 ```

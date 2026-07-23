@@ -1,0 +1,95 @@
+
+=== world: default (seed=20260707, n_entities=800) ===
+generated 83628 transactions, 2018 wallets, 29 launderers
+degeneracy audit: 800 entities (29 launderers), cap AUC=0.95
+  gate 1 (single-feature AUC cap): PASS (worst: w_frac_fast_mean = 0.887)
+  gate 2 (no class-disjoint marginal): PASS
+  top single-feature AUCs:
+    0.887  w_frac_fast_mean  KS=0.738
+    0.841  w_frac_fast_max  KS=0.656
+    0.841  frac_fast_value[wallet-max-hi]
+    0.824  internal_vol  KS=0.709
+    0.817  frac_fast_value[wallet-max-lo]
+    0.816  ent_n_in  KS=0.765
+    0.811  chain_fast_value  KS=0.678
+    0.800  in_degree[wallet-max-hi]
+    0.798  total_in[wallet-max-hi]
+    0.794  n_in[wallet-max-hi]
+    0.785  median_out_lag[wallet-max-lo]
+    0.785  w_min_out_lag  KS=0.507
+
+four-tier results (entity-level, clustered bootstrap 95% CI):
+  logit  T1: AUC 0.915 [0.818, 0.979]   AP 0.722 [0.537, 0.871]
+  logit  T2: AUC 0.944 [0.896, 0.982]   AP 0.768 [0.619, 0.897]
+  logit  T3: AUC 0.979 [0.957, 0.994]   AP 0.793 [0.638, 0.904]
+  logit  T4: AUC 0.986 [0.972, 0.996]   AP 0.821 [0.681, 0.926]
+  gboost T1: AUC 0.936 [0.849, 0.994]   AP 0.833 [0.694, 0.938]
+  gboost T2: AUC 0.988 [0.967, 0.998]   AP 0.897 [0.793, 0.968]
+  gboost T3: AUC 0.992 [0.979, 0.999]   AP 0.914 [0.819, 0.975]
+  gboost T4: AUC 0.992 [0.979, 0.999]   AP 0.914 [0.819, 0.975]
+
+label-permutation negative control (T4 gboost): AUC = 0.407 (expect ~0.5)
+
+TOST T3 vs T2 (logit): dAUC = +0.0346, 90% CI [+0.0054, +0.0680], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: INCONCLUSIVE
+TOST T4 vs T2 (logit): dAUC = +0.0412, 90% CI [+0.0116, +0.0764], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: INCONCLUSIVE
+TOST T3 vs T2 (gboost): dAUC = +0.0043, 90% CI [+0.0004, +0.0101], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: EQUIVALENT
+TOST T4 vs T2 (gboost): dAUC = +0.0043, 90% CI [+0.0004, +0.0101], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: EQUIVALENT
+
+=== world: surveillance_strong (seed=20260707, n_entities=800) ===
+generated 84323 transactions, 2018 wallets, 29 launderers
+degeneracy audit: 800 entities (29 launderers), cap AUC=0.95
+  gate 1 (single-feature AUC cap): PASS (worst: jurisdiction_risk = 0.874)
+  gate 2 (no class-disjoint marginal): PASS
+  top single-feature AUCs:
+    0.874  jurisdiction_risk  KS=0.587
+    0.846  prior_sar_count  KS=0.677
+    0.795  ent_n_in  KS=0.698
+    0.782  kyc_tier  KS=0.422
+    0.750  on_watchlist  KS=0.499
+    0.748  ent_total_in  KS=0.517
+    0.745  n_in[wallet-max-hi]
+    0.742  frac_fast_value[wallet-max-lo]
+    0.738  w_frac_fast_mean  KS=0.434
+    0.733  n_in[wallet-max-lo]
+    0.716  in_degree[wallet-max-hi]
+    0.715  total_in[wallet-max-hi]
+
+four-tier results (entity-level, clustered bootstrap 95% CI):
+  logit  T1: AUC 0.852 [0.755, 0.934]   AP 0.451 [0.291, 0.616]
+  logit  T2: AUC 0.816 [0.730, 0.896]   AP 0.369 [0.199, 0.555]
+  logit  T3: AUC 0.987 [0.976, 0.996]   AP 0.841 [0.724, 0.936]
+  logit  T4: AUC 0.992 [0.984, 0.998]   AP 0.902 [0.803, 0.972]
+  gboost T1: AUC 0.885 [0.803, 0.955]   AP 0.503 [0.332, 0.666]
+  gboost T2: AUC 0.925 [0.836, 0.986]   AP 0.773 [0.623, 0.890]
+  gboost T3: AUC 0.997 [0.993, 0.999]   AP 0.930 [0.856, 0.981]
+  gboost T4: AUC 0.997 [0.993, 0.999]   AP 0.939 [0.865, 0.985]
+
+TOST T3 vs T2 (logit): dAUC = +0.1713, 90% CI [+0.1053, +0.2392], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: SURVEILLANCE_SUPERIOR
+TOST T4 vs T2 (logit): dAUC = +0.1760, 90% CI [+0.1099, +0.2438], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: SURVEILLANCE_SUPERIOR
+TOST T3 vs T2 (gboost): dAUC = +0.0712, 90% CI [+0.0186, +0.1377], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: INCONCLUSIVE
+TOST T4 vs T2 (gboost): dAUC = +0.0716, 90% CI [+0.0190, +0.1379], margin ±0.03
+  effective N = 800 entities (29 launderers)
+  verdict: INCONCLUSIVE
+
+=== harness self-check ===
+surveillance_strong TOST verdicts (must NOT all be EQUIVALENT, expect SURVEILLANCE_SUPERIOR):
+  T2_vs_T3_logit: SURVEILLANCE_SUPERIOR
+  T2_vs_T4_logit: SURVEILLANCE_SUPERIOR
+  T2_vs_T3_gboost: INCONCLUSIVE
+  T2_vs_T4_gboost: INCONCLUSIVE
+
+all results written to results/
