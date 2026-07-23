@@ -83,12 +83,23 @@ propagation, queueing delays. Pure Python 3, no dependencies.
 python3 pet_aml_sim.py --days 2 --tx-per-day 20000 --psps 8 --seed 7
 ```
 
-**Known issue (Andrew's call):** `risk_tier` is read inside the transaction loop (travel-rule
-check and escalation, ~lines 468/475) but only assigned by `run_batch` risk propagation
-*after* the loop completes — so tier-based escalation can never fire, and the "zero
-escalations" result is guaranteed by construction rather than by the architecture. §5.4.3 has
-been reworded to say exactly that in the interim. A fix plus a seeded rerun (and a look at the
-36.8% rejection-rate calibration) would let Table 3 carry an honest escalation number.
+**Note:** the copy of `pet_aml_sim.py` on this branch (`main`) still has the escalation-ordering
+bug described below — it has been fixed, but only on `jul2026-working`, alongside the
+manuscript update that depends on it. Use that branch if you want the corrected simulator; this
+one is kept as-is because `main.tex` here (the stale February version) still quotes the old
+"zero escalations" result, and updating the code without updating the text would make the two
+contradict each other on the same branch.
+
+```bash
+git checkout jul2026-working   # corrected pet_aml_sim.py + matching manuscript
+```
+
+**Original issue, for reference:** `risk_tier` was read inside the transaction loop (travel-rule
+check and escalation, ~lines 468/475) but only assigned by `run_batch` risk propagation *after*
+the loop completed — so tier-based escalation could never fire, and the "zero escalations"
+result was guaranteed by construction rather than by the architecture. Fixed on
+`jul2026-working` by running risk propagation once per simulated day instead of once at the end;
+a reseeded rerun there now reports a real (small) escalation count.
 
 ## References
 
