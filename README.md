@@ -27,11 +27,15 @@ Two things are in flight and are **not** reflected in the `main.tex` on this bra
    cryptographic-compliance lineage (trustee e-cash → Compact E-Cash → GGM16 →
    Platypus/PEReDi → Privacy Pools) plus BIS Aurora/Hertha, and the paper was repositioned
    around what survives. Full change log and the revised manuscript are on the
-   **`jul2026-working`** branch (`CHANGES-FOR-ANDREW.md`, `FORWARD_NOTE.md`).
+   **`jul2026-working`** branch.
 
 ```bash
 git checkout jul2026-working   # current manuscript + compiled PDF + change logs
 ```
+
+Start there with `WORKING-STATE.md` (where the paper is and what's open), then
+`CHANGES-FOR-ANDREW.md` (the 21 July revision, item by item) and `FORWARD_NOTE.md`
+(why the bibliography was replaced).
 
 Target venue: MDPI *FinTech*, regular track, mid-September.
 
