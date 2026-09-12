@@ -1,0 +1,30 @@
+1 22 b=low|s=low|p=0.05 2026091202 OK
+2 22 b=low|s=mid|p=0.05 2026091203 OK
+3 22 b=low|s=mid|p=0.05 2026091204 OK
+4 22 b=low|s=low|p=0.05 2026091201 OK
+5 22 b=low|s=high|p=0.05 2026091206 OK
+6 22 b=mid|s=low|p=0.05 2026091207 OK
+7 22 b=low|s=high|p=0.05 2026091205 OK
+8 22 b=mid|s=low|p=0.05 2026091208 OK
+/usr/lib/python3.14/multiprocessing/resource_tracker.py:475: UserWarning: resource_tracker: There appear to be 5 leaked semaphore objects to clean up at shutdown: {'/loky-1974625-i94vs5w_', '/loky-1974625-0jpe56po', '/loky-1974625-i78_01kr', '/loky-1974625-s4xzuoq1', '/loky-1974625-n21cnwu7'}
+  warnings.warn(
+Resume: 8 completed units; workers: 12
+9 22 b=mid|s=mid|p=0.01 2026091220 OK
+10 22 b=mid|s=mid|p=0.01 2026091219 OK
+11 22 b=mid|s=mid|p=0.05 2026091210 OK
+12 22 b=mid|s=mid|p=0.05 2026091209 OK
+13 22 b=high|s=high|p=0.05 2026091217 OK
+14 22 b=high|s=low|p=0.05 2026091214 OK
+15 22 b=high|s=mid|p=0.05 2026091216 OK
+16 22 b=high|s=high|p=0.05 2026091218 OK
+17 22 b=mid|s=high|p=0.05 2026091212 OK
+18 22 b=high|s=low|p=0.05 2026091213 OK
+19 22 b=high|s=mid|p=0.05 2026091215 OK
+20 22 b=mid|s=high|p=0.05 2026091211 OK
+21 22 b=mid|s=mid|p=0.03 2026091222 OK
+22 22 b=mid|s=mid|p=0.03 2026091221 OK
+Traceback (most recent call last):
+  File "/home/purrpower/work/projects/papers/papers-official/cbdc-privacy/andrew-cbdc/detection/revision20260912/run_diagnostics.py", line 73, in <module>
+AssertionError: {'label': True, 'seed': True, 'config': False, 'gate': True, 'models': True}
+
+Post-run JSON-boundary comparison: all fields exactly equal; in-memory tuple/list-only comparator defect corrected without refitting.

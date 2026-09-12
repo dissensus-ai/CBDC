@@ -1,0 +1,13 @@
+PASS: test_budget_cannot_exceed_population
+PASS: test_budget_scales_per_10k
+PASS: test_delta_sign_positive_when_lo_arm_is_worse
+PASS: test_delta_zero_when_arms_agree
+PASS: test_did_sign_positive_when_linear_model_gains_more
+PASS: test_missed_per_10k_formula
+PASS: test_perfect_detector_misses_only_what_budget_forbids
+PASS: test_resolution_scan_flags_the_saturated_regime
+PASS: test_resolution_scan_sees_signal_when_arms_differ
+PASS: test_tiebreak_lower_id_wins
+PASS: test_tiebreak_rejects_string_ids
+
+all 11 endpoint tests passed

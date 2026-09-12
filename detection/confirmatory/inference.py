@@ -29,6 +29,7 @@ __all__ = [
     "mean_ci",
     "non_inferiority",
     "gated_did",
+    "summarize_hypotheses",
     "replicates_needed",
     "size_from_pilot",
 ]
@@ -84,7 +85,7 @@ def non_inferiority(values, delta_star, alpha=0.10):
         out["degenerate"] = True
         out["degenerate_note"] = (
             "every replicate returned delta=0 exactly: the budget is in the "
-            "saturated regime where both arms review identical entities. This "
+            "sampled regime where both arms recover the same positive count. This "
             "verdict is forced by the operating point, not measured.")
     return out
 
@@ -118,6 +119,28 @@ def gated_did(did_values, h1_verdict, alpha=0.10):
         out["note"] = ("drop the 'capacity conditions the value of identity "
                        "access' headline; report DiD as inconclusive")
     return out
+
+
+def summarize_hypotheses(delta_values, did_values, delta_star, alpha=0.10,
+                         h2_confirmatory=True):
+    """Apply the actual H1 result to H2, including estimate-only locks.
+
+    September 2026 correction: an undeclared tolerance does not establish H1.
+    A descriptive-only lock likewise cannot produce a confirmatory H2 label.
+    """
+    if delta_star is None:
+        h1 = mean_ci(delta_values, alpha)
+        h1["verdict"] = "ESTIMATE_ONLY"
+        h1["note"] = ("delta* deliberately unset: report the estimate and its "
+                      "interval; no non-inferiority verdict is defined")
+    else:
+        h1 = non_inferiority(delta_values, delta_star, alpha)
+    h2 = gated_did(did_values, h1["verdict"], alpha)
+    if not h2_confirmatory:
+        h2["confirmatory"] = False
+        h2["status"] = "DESCRIPTIVE_ONLY"
+        h2["note"] = "Protocol lock disables a confirmatory H2 claim."
+    return h1, h2
 
 
 def replicates_needed(sd, tau, alpha=0.10, r_min=20):

@@ -1,8 +1,8 @@
-"""TOST equivalence test: pseudonymous linkage (T2) vs full surveillance (T4).
+"""Historical pilot TOST test; not used for the September manuscript's claims.
 
-The paper's thesis is "identity + watchlist add no meaningful detection
-value beyond ZK-achievable pseudonymous linkage." That is an EQUIVALENCE
-claim, so it needs an equivalence test with a pre-registered margin, not
+The historical hypothesis was "identity + watchlist add no meaningful detection
+value beyond supplied oracle pseudonymous linkage." That is an EQUIVALENCE
+claim, so it needs an equivalence test with a justified pre-specified margin, not
 "1.00 = 1.00" on a saturated toy.
 
 Method: paired entity-clustered percentile bootstrap of
@@ -20,8 +20,8 @@ Verdicts — the harness must be able to produce ALL of these:
   INCONCLUSIVE             CI straddles a margin bound: underpowered; no
                            equivalence claim may be made.
 
-Default margin delta = 0.03 AUC (design pack §8 Q2 — pre-registered
-default, an open call for MF; must be fixed before real-data runs).
+Default margin delta = 0.03 AUC (design pack §8 Q2 — historically pre-specified
+exploratory default, not a deployment tolerance and not used in September).
 
 METRIC DEPENDENCE (added 24 Jul 2026 — POST HOC, disclose as such).
 The test was originally AUC-only. At the operating points this DGP

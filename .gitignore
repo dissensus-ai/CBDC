@@ -48,3 +48,10 @@ desktop.ini
 # confirmatory pilot outputs are regenerated; the summary is committed by hand
 detection/confirmatory/results/pilot_replicates.json
 detection/confirmatory/results/*.log
+
+# September review candidate: figures and PDF are reviewable outputs.
+!revision-2026-09-12/manuscript/main.pdf
+!revision-2026-09-12/manuscript/figures/*.pdf
+!revision-2026-09-12/evidence/*.log
+revision-2026-09-12/build/
+revision-2026-09-12/evidence/page-*.png

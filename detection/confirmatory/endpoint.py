@@ -117,8 +117,9 @@ def resolution_scan(y, scores_lo, scores_hi, tiebreak, k_star_grid, n=None):
 
     Returns one record per k_star with the paired delta and the precision
     achieved by the better-informed arm. Where precision_hi == 1.0 and
-    delta == 0, the endpoint cannot distinguish the arms at that budget and no
-    number of replicates will change that.
+    delta == 0, this sampled endpoint cannot distinguish the arms at that
+    budget. More replicates are not guaranteed to resolve it; an observed
+    saturation pattern does not prove every future world will be saturated.
 
     Exploratory only -- never used to pick k after seeing confirmatory data.
     """

@@ -1,0 +1,3 @@
+PASS: audit hard-fails on the original num_wallets artifact
+PASS: shipped DGP audit-clean (worst internal_vol = 0.859; num_wallets = 0.505)
+all tests passed

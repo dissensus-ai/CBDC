@@ -1,4 +1,4 @@
-"""Pre-registered degeneracy audit (design pack §4.1, gates 1-2).
+"""Pre-specified degeneracy audit (design pack §4.1, gates 1-2).
 
 Runs BEFORE any headline number. Hard-fails (raises / exits non-zero) if
 the data-generating process contains a definitional separator:
@@ -89,7 +89,7 @@ def audit(entity_feats, wallet_feats, tier_cols, t1_cols) -> dict:
     }
     if not violations.empty or not disjoint.empty:
         raise DegeneracyError(
-            "DEGENERACY AUDIT FAILED — run is void, re-draw the DGP.\n"
+            "DEGENERACY AUDIT FAILED — log this failed unit; do not redraw its seed.\n"
             + violations.to_string(index=False)
             + ("\nclass-disjoint features:\n" + disjoint.to_string(index=False)
                if not disjoint.empty else ""))

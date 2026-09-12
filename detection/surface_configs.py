@@ -2,15 +2,16 @@
 
 Two named axes, three levels each, plus a prevalence sweep. The default
 world (b=mid, s=mid, p=0.05) is REQUIRED to be field-identical to
-``dgp.default_config`` — enforced by ``test_ladder.py`` — so every prior
-result remains the unmodified mid/mid point of the surface.
+``dgp.default_config`` after matching population size and the label field.
+The September regenerator checks this configuration identity.
 
 Axis semantics:
 
 * Behavioral recoverability ``b`` maps onto the existing ``obfuscation``
   knob only (higher obfuscation = lower recoverability). Laundering
-  volume/cycle parameters are deliberately NOT varied, so the axis is
-  pure signal-recoverability, not signal-quantity.
+  volume/cycle parameters are not varied, but obfuscation also changes
+  cover activity. This is a generated-regime axis, not a pure intervention
+  on signal recoverability.
 * Identity signal ``s`` sets the nine identity-attribute parameters as a
   block. ``low`` sets every launderer parameter equal to its legitimate
   counterpart (identity attributes carry zero class signal by

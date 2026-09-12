@@ -1,0 +1,62 @@
+{
+  "checked": "2026-09-12",
+  "provider": "scite",
+  "notes": "Publisher/repository primary sources supply full author lists; scite list truncates authors and two titles.",
+  "records": [
+    {
+      "doi": "10.1145/3548606.3560707",
+      "title": "PEReDi",
+      "authors": [
+        {
+          "authorName": "Aggelos Kiayias"
+        },
+        {
+          "authorName": "Markulf Kohlweiss"
+        },
+        {
+          "authorName": "Amirreza Sarencheh"
+        }
+      ],
+      "year": 2022,
+      "page": "1739-1752",
+      "publisher": "ACM"
+    },
+    {
+      "doi": "10.1145/3548606.3560617",
+      "title": "Platypus",
+      "authors": [
+        {
+          "authorName": "Karl Wüst"
+        },
+        {
+          "authorName": "Kari Kostiainen"
+        },
+        {
+          "authorName": "Noah Delius"
+        }
+      ],
+      "year": 2022,
+      "page": "2947-2960",
+      "publisher": "ACM"
+    },
+    {
+      "doi": "10.1016/j.bcra.2023.100176",
+      "title": "Blockchain privacy and regulatory compliance: Towards a practical equilibrium",
+      "authors": [
+        {
+          "authorName": "Vitalik Buterin"
+        },
+        {
+          "authorName": "Jacob Illum"
+        },
+        {
+          "authorName": "Matthias Nadler"
+        }
+      ],
+      "year": 2024,
+      "page": "100176",
+      "journal": "blockchain research and applications",
+      "publisher": "Elsevier BV"
+    }
+  ]
+}

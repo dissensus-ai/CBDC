@@ -1,3 +1,17 @@
+# What Does Identity-Linked Information Buy?
+
+**Current review candidate: 12 September 2026.** This branch contains a new compact measurement manuscript and a code-level correction. Start with [the draft](revision-2026-09-12/manuscript/main.tex), [PDF](revision-2026-09-12/manuscript/main.pdf), [scientific adjudication](revision-2026-09-12/ADJUDICATION.md), and [reproduction instructions](revision-2026-09-12/REPRODUCE.md).
+
+The full 52-replicate independent-population analysis has been freshly reproduced with identical raw records. Its historical H2 confirmatory label was erroneous: the driver opened the non-inferiority gate despite an unset tolerance. This branch repairs that logic and reports H2 descriptively. The August raw files are retained unchanged as historical evidence; consult the adjudicated September results for interpretation.
+
+The 122 original ladder units are reaggregated, the surface's 5% versus planned 3% prevalence deviation is disclosed, and missing per-world permutation controls are supplied as retrospective diagnostics. The new manuscript distinguishes customer attributes, watchlists, and oracle linkage; no system deployment or anonymity guarantee is claimed.
+
+**Status:** draft for review; no journal submission, arXiv submission, revised Zenodo deposit, or co-author endorsement is implied. The root `main.tex`/`main.pdf` and the old documentation below are August historical artifacts, not this branch's September manuscript. Build from `revision-2026-09-12/manuscript/` only. All new datasets are synthetic.
+
+---
+
+## Historical README (August 2026; retained as provenance)
+
 # Privacy-Preserving Financial Surveillance: An Architectural Framework for CBDC Implementation
 
 Murad Farzulla — [Farzulla Research](https://farzulla.org) — [ORCID](https://orcid.org/0009-0002-7164-8704)

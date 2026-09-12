@@ -1,0 +1,72 @@
+confirmatory run under lock 160e9a776287
+  recorded names (may include written deferrals): Murad Farzulla, Andrew Maksakov
+  R         : 52   seeds 2026080501..2026080552
+  k*        : 500/10k on n_test=10000
+  delta*    : UNSET -> estimate reported, no binary verdict
+  H2        : confirmatory only if enabled AND H1 establishes non-inferiority
+  [1/52] rep    5 OK          delta_L3=+6.0
+  [2/52] rep    4 OK          delta_L3=+10.0
+  [3/52] rep    2 OK          delta_L3=+7.0
+  [4/52] rep    0 OK          delta_L3=+4.0
+  [5/52] rep    1 OK          delta_L3=+10.0
+  [6/52] rep    3 OK          delta_L3=+2.0
+  [7/52] rep    6 OK          delta_L3=+10.0
+  [8/52] rep    9 OK          delta_L3=+13.0
+  [9/52] rep    7 OK          delta_L3=+8.0
+  [10/52] rep    8 OK          delta_L3=+8.0
+  [11/52] rep   10 OK          delta_L3=+9.0
+  [12/52] rep   11 OK          delta_L3=+13.0
+  [13/52] rep   12 OK          delta_L3=+6.0
+  [14/52] rep   13 OK          delta_L3=+3.0
+  [15/52] rep   16 OK          delta_L3=+6.0
+  [16/52] rep   17 OK          delta_L3=+9.0
+  [17/52] rep   15 OK          delta_L3=+1.0
+  [18/52] rep   14 OK          delta_L3=+9.0
+  [19/52] rep   18 OK          delta_L3=+8.0
+  [20/52] rep   19 OK          delta_L3=+11.0
+  [21/52] rep   23 OK          delta_L3=+7.0
+  [22/52] rep   22 OK          delta_L3=+12.0
+  [23/52] rep   21 OK          delta_L3=+12.0
+  [24/52] rep   20 OK          delta_L3=+10.0
+  [25/52] rep   25 OK          delta_L3=+8.0
+  [26/52] rep   24 OK          delta_L3=+9.0
+  [27/52] rep   26 OK          delta_L3=+4.0
+  [28/52] rep   29 OK          delta_L3=+9.0
+  [29/52] rep   27 OK          delta_L3=+6.0
+  [30/52] rep   28 OK          delta_L3=+9.0
+  [31/52] rep   30 OK          delta_L3=+8.0
+  [32/52] rep   31 OK          delta_L3=+10.0
+  [33/52] rep   32 OK          delta_L3=+8.0
+  [34/52] rep   33 OK          delta_L3=+0.0
+  [35/52] rep   34 OK          delta_L3=+3.0
+  [36/52] rep   35 OK          delta_L3=+6.0
+  [37/52] rep   37 OK          delta_L3=+12.0
+  [38/52] rep   36 OK          delta_L3=+5.0
+  [39/52] rep   38 OK          delta_L3=+13.0
+  [40/52] rep   39 OK          delta_L3=+9.0
+  [41/52] rep   40 OK          delta_L3=+12.0
+  [42/52] rep   41 OK          delta_L3=+10.0
+  [43/52] rep   42 OK          delta_L3=+12.0
+  [44/52] rep   43 OK          delta_L3=+7.0
+  [45/52] rep   45 OK          delta_L3=+9.0
+  [46/52] rep   44 OK          delta_L3=+9.0
+  [47/52] rep   46 OK          delta_L3=+7.0
+  [48/52] rep   47 OK          delta_L3=+4.0
+  [49/52] rep   48 OK          delta_L3=+2.0
+  [50/52] rep   50 OK          delta_L3=+11.0
+  [51/52] rep   49 OK          delta_L3=+3.0
+  [52/52] rep   51 OK          delta_L3=+12.0
+
+52/52 OK, 0 failed (0.0%) -- logged, not redrawn
+
+=== H1 (primary, L3) ===
+  mean delta_miss = +7.904  90% CI [+7.132, +8.675]   verdict ESTIMATE_ONLY
+
+=== H2 (DiD, DESCRIPTIVE) ===
+  mean DiD = +23.442  90% CI [+21.832, +25.052]   DESCRIPTIVE_ONLY
+  note: H1 did not establish non-inferiority, so H2 is descriptive. The manuscript may NOT claim confirmatory evidence that model capacity conditions the value of identity-linked auxiliary information.
+
+=== H3 (L0, descriptive) ===
+  mean delta_miss = +31.346  90% CI [+29.930, +32.763]
+
+written to revision-2026-09-12/evidence/confirmatory-rerun/confirmatory_summary.json

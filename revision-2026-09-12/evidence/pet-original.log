@@ -1,0 +1,28 @@
+\n=== PET AML Stack Simulation Summary ===
+Transactions generated:      40,000
+Settled:                     25,287
+Rejected:                    14,713
+  - Sanctions blocked:       82
+Escalations (case packets):  27
+Total PSI comm (MB):         156,851.87
+Total proof bytes:           20,438,016 bytes
+Estimated MPC batch runtime: 0.38 hours (aggregate)
+\nLatency (ms) for settled tx:
+  mean: 536.78
+  p50 : 510.54
+  p90 : 768.08
+  p99 : 1137.31
+\nQueue waits (ms):
+  PSP    mean=0.00 p90=0.00 p99=0.00
+  PSI    mean=28.30 p90=14.11 p99=533.04
+  PROVE  mean=0.79 p90=0.00 p99=0.00
+  TR     mean=0.00 p90=0.00 p99=0.00
+  LEDGER mean=0.00 p90=0.00 p99=0.00
+\nTop rejection reasons:
+  TIER_TX_LIMIT                14,631
+  SANCTIONS_HIT                82
+\nRisk tier distribution (end of sim):
+  tier 0: 39,865 (99.66%)
+  tier 1: 12 (0.03%)
+  tier 2: 43 (0.11%)
+  tier 3: 80 (0.20%)

@@ -1,3 +1,11 @@
+# September 2026 correction and current entry point
+
+The historical text below describes a pre-run planning state and is superseded. The 52-replicate independent-population run exists and has now been reproduced exactly. Its old H2 confirmatory label is incorrect: an unset H1 tolerance was treated as a successful H1 gate. `inference.summarize_hypotheses` now uses the actual status and H2 is descriptive. See `../../revision-2026-09-12/REPRODUCE.md` and `../../revision-2026-09-12/ADJUDICATION.md`.
+
+No public preregistration or two-author scientific signature is inferred from the lock; one signature object records a written deferral. The original raw summary remains immutable for provenance, including its superseded H2 metadata. Use the September adjudicated results.
+
+---
+
 # Confirmatory pipeline (protocol v3 + statistical erratum)
 
 Implements the prospective design in `grok-frontiers-review/01-prospective-protocol-v3.md`

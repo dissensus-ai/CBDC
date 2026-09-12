@@ -3,7 +3,8 @@
 T1  structure-only:      per-WALLET features on unlinked pseudonyms.
 T2  + pseudonymous link: entity-level aggregates over the linked wallet
                           cluster (num wallets, internal flow, cross-wallet
-                          pass-through) — achievable with ZK linkage.
+                          pass-through) — oracle wallet map supplied;
+                          no linkage protocol is implemented here.
 T3  + identity attrs:    T2 + KYC tier, account age, prior SARs, jurisdiction.
 T4  + watchlist:         T3 + watchlist bit.
 

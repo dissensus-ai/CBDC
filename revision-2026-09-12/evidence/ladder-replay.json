@@ -1,0 +1,340 @@
+{
+  "fields_equal": {
+    "label": true,
+    "seed": true,
+    "config": true,
+    "gate": true,
+    "models": true
+  },
+  "reproduced_record": {
+    "label": "b=mid|s=mid|p=0.05",
+    "seed": 2026082051,
+    "config": {
+      "seed": 2026082051,
+      "n_entities": 8000,
+      "base_rate": 0.05,
+      "sim_days": 120.0,
+      "obfuscation": 0.6,
+      "reporting_threshold": 10000.0,
+      "n_external": 3000,
+      "wallet_count_p": 0.3,
+      "cycles_per_120d": 3.0,
+      "placement_mu": 8.25,
+      "placement_sigma": 0.6,
+      "smurf_prob": 0.6,
+      "watchlist_tpr": 0.4,
+      "watchlist_fpr": 0.02,
+      "sar_lambda_launderer": 0.4,
+      "sar_lambda_legit": 0.1,
+      "kyc_low_prob_launderer": 0.45,
+      "kyc_low_prob_legit": 0.3,
+      "juris_beta_launderer": [
+        2.4,
+        4.0
+      ],
+      "juris_beta_legit": [
+        2.0,
+        5.0
+      ],
+      "acct_age_mu_launderer": 5.9,
+      "acct_age_mu_legit": 6.3,
+      "acct_age_sigma": 0.7,
+      "label": "b=mid|s=mid|p=0.05"
+    },
+    "gate": "pass",
+    "models": {
+      "M1_linear": {
+        "tiers": {
+          "T1": {
+            "ap": 0.8295233815429757,
+            "auc": 0.9604475722274014,
+            "recall_at_budget": 0.7608142493638677,
+            "precision_at_budget": 0.7475,
+            "missed_per_10k": 117.5,
+            "alerts_per_10k": 500.0
+          },
+          "T2": {
+            "ap": 0.861721782818723,
+            "auc": 0.979453436318698,
+            "recall_at_budget": 0.7760814249363868,
+            "precision_at_budget": 0.7625,
+            "missed_per_10k": 110.0,
+            "alerts_per_10k": 500.0
+          },
+          "T3": {
+            "ap": 0.880932232657581,
+            "auc": 0.9820658687542042,
+            "recall_at_budget": 0.8040712468193384,
+            "precision_at_budget": 0.79,
+            "missed_per_10k": 96.25,
+            "alerts_per_10k": 500.0
+          },
+          "T4": {
+            "ap": 0.9111480754769743,
+            "auc": 0.9867371387877311,
+            "recall_at_budget": 0.8396946564885496,
+            "precision_at_budget": 0.825,
+            "missed_per_10k": 78.75,
+            "alerts_per_10k": 500.0
+          }
+        },
+        "increments": {
+          "ap": {
+            "dL": 0.03219840127574736,
+            "dI": 0.019210449838858,
+            "dW": 0.030215842819393268,
+            "dF": 0.04942629265825127
+          },
+          "recall_at_budget": {
+            "dL": 0.01526717557251911,
+            "dI": 0.027989821882951627,
+            "dW": 0.03562340966921118,
+            "dF": 0.06361323155216281
+          }
+        },
+        "chosen_params": [
+          {
+            "C": 10.0
+          },
+          {
+            "C": 10.0
+          },
+          {
+            "C": 10.0
+          },
+          {
+            "C": 10.0
+          },
+          {
+            "C": 10.0
+          }
+        ],
+        "n_entities": 8000,
+        "n_launderers": 393
+      },
+      "M2_additive": {
+        "tiers": {
+          "T1": {
+            "ap": 0.7805698209148662,
+            "auc": 0.9551036259291112,
+            "recall_at_budget": 0.7099236641221374,
+            "precision_at_budget": 0.6975,
+            "missed_per_10k": 142.5,
+            "alerts_per_10k": 500.0
+          },
+          "T2": {
+            "ap": 0.9438391122014794,
+            "auc": 0.9922071909795149,
+            "recall_at_budget": 0.8829516539440203,
+            "precision_at_budget": 0.8675,
+            "missed_per_10k": 57.5,
+            "alerts_per_10k": 500.0
+          },
+          "T3": {
+            "ap": 0.9474853333009,
+            "auc": 0.992640700894549,
+            "recall_at_budget": 0.8905852417302799,
+            "precision_at_budget": 0.875,
+            "missed_per_10k": 53.74999999999999,
+            "alerts_per_10k": 500.0
+          },
+          "T4": {
+            "ap": 0.9538716709591779,
+            "auc": 0.9929922587037316,
+            "recall_at_budget": 0.9033078880407125,
+            "precision_at_budget": 0.8875,
+            "missed_per_10k": 47.5,
+            "alerts_per_10k": 500.0
+          }
+        },
+        "increments": {
+          "ap": {
+            "dL": 0.16326929128661327,
+            "dI": 0.003646221099420588,
+            "dW": 0.006386337658277896,
+            "dF": 0.010032558757698484
+          },
+          "recall_at_budget": {
+            "dL": 0.17302798982188294,
+            "dI": 0.007633587786259555,
+            "dW": 0.012722646310432628,
+            "dF": 0.020356234096692183
+          }
+        },
+        "chosen_params": [
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          }
+        ],
+        "n_entities": 8000,
+        "n_launderers": 393
+      },
+      "M3_forest": {
+        "tiers": {
+          "T1": {
+            "ap": 0.8614042568571532,
+            "auc": 0.9755486693486747,
+            "recall_at_budget": 0.7913486005089059,
+            "precision_at_budget": 0.7775,
+            "missed_per_10k": 102.5,
+            "alerts_per_10k": 500.0
+          },
+          "T2": {
+            "ap": 0.9609089944997846,
+            "auc": 0.9941267099975881,
+            "recall_at_budget": 0.910941475826972,
+            "precision_at_budget": 0.895,
+            "missed_per_10k": 43.75000000000001,
+            "alerts_per_10k": 500.0
+          },
+          "T3": {
+            "ap": 0.9603452686902337,
+            "auc": 0.9938393758795218,
+            "recall_at_budget": 0.9083969465648855,
+            "precision_at_budget": 0.8925,
+            "missed_per_10k": 45.0,
+            "alerts_per_10k": 500.0
+          },
+          "T4": {
+            "ap": 0.9642088490687175,
+            "auc": 0.9946199278754569,
+            "recall_at_budget": 0.910941475826972,
+            "precision_at_budget": 0.895,
+            "missed_per_10k": 43.75000000000001,
+            "alerts_per_10k": 500.0
+          }
+        },
+        "increments": {
+          "ap": {
+            "dL": 0.09950473764263146,
+            "dI": -0.0005637258095508857,
+            "dW": 0.0038635803784837774,
+            "dF": 0.0032998545689328918
+          },
+          "recall_at_budget": {
+            "dL": 0.11959287531806617,
+            "dI": -0.0025445292620865922,
+            "dW": 0.0025445292620865922,
+            "dF": 0.0
+          }
+        },
+        "chosen_params": [
+          {
+            "max_features": "sqrt",
+            "min_samples_leaf": 1
+          },
+          {
+            "max_features": "sqrt",
+            "min_samples_leaf": 1
+          },
+          {
+            "max_features": "sqrt",
+            "min_samples_leaf": 5
+          },
+          {
+            "max_features": "sqrt",
+            "min_samples_leaf": 1
+          },
+          {
+            "max_features": "sqrt",
+            "min_samples_leaf": 1
+          }
+        ],
+        "n_entities": 8000,
+        "n_launderers": 393
+      },
+      "M4_boosted": {
+        "tiers": {
+          "T1": {
+            "ap": 0.8719447474537201,
+            "auc": 0.9763158414089608,
+            "recall_at_budget": 0.7938931297709924,
+            "precision_at_budget": 0.78,
+            "missed_per_10k": 101.25,
+            "alerts_per_10k": 500.0
+          },
+          "T2": {
+            "ap": 0.9573682027479189,
+            "auc": 0.9901182485262837,
+            "recall_at_budget": 0.910941475826972,
+            "precision_at_budget": 0.895,
+            "missed_per_10k": 43.75000000000001,
+            "alerts_per_10k": 500.0
+          },
+          "T3": {
+            "ap": 0.9569383154497452,
+            "auc": 0.9894158019047006,
+            "recall_at_budget": 0.910941475826972,
+            "precision_at_budget": 0.895,
+            "missed_per_10k": 43.75000000000001,
+            "alerts_per_10k": 500.0
+          },
+          "T4": {
+            "ap": 0.9617011535580307,
+            "auc": 0.9919141703887975,
+            "recall_at_budget": 0.910941475826972,
+            "precision_at_budget": 0.895,
+            "missed_per_10k": 43.75000000000001,
+            "alerts_per_10k": 500.0
+          }
+        },
+        "increments": {
+          "ap": {
+            "dL": 0.08542345529419881,
+            "dI": -0.0004298872981737256,
+            "dW": 0.004762838108285483,
+            "dF": 0.0043329508101117575
+          },
+          "recall_at_budget": {
+            "dL": 0.11704834605597969,
+            "dI": 0.0,
+            "dW": 0.0,
+            "dF": 0.0
+          }
+        },
+        "chosen_params": [
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 31
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          },
+          {
+            "learning_rate": 0.1,
+            "max_leaf_nodes": 15
+          }
+        ],
+        "n_entities": 8000,
+        "n_launderers": 393
+      }
+    }
+  },
+  "comparison_note": "Compared parsed JSON records. The first in-memory comparator treated dataclass parameter tuples and their serialized JSON lists as unequal; the validator now normalizes to the artifact boundary before comparison. All scientific fields match exactly."
+}

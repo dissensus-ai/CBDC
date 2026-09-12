@@ -1,0 +1,13 @@
+PASS: test_burned_seed_reuse_refuses
+PASS: test_hash_is_order_independent
+PASS: test_missing_R_refuses
+PASS: test_missing_file_refuses
+PASS: test_oversized_seed_base_refuses
+PASS: test_saturated_budget_refuses
+PASS: test_tampered_lock_refuses
+PASS: test_template_is_written_unsigned
+PASS: test_unsigned_refuses
+PASS: test_valid_lock_passes
+PASS: test_wrong_role_refuses
+
+all 11 lock tests passed
