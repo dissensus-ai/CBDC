@@ -1,0 +1,902 @@
+{
+  "arm": "E10",
+  "status": "EXPLORATORY",
+  "halted": null,
+  "primary_estimand": "lambda_star_mean",
+  "secondary_estimand": "lambda_star_LB",
+  "path": "piecewise: [0,1] s=low->mid, [1,2] s=mid->high; kink at 1",
+  "identity_rng_stream": true,
+  "models": [
+    "gboost",
+    "logit",
+    "additive"
+  ],
+  "R": 2,
+  "seed_mode": "DEV",
+  "seed_base": 700411,
+  "test_seed_offset": 10000003,
+  "addendum_lock": null,
+  "args": {
+    "seed_base": 700411,
+    "R": 2,
+    "addendum_lock": null,
+    "n_train": 10000,
+    "n_test": 10000,
+    "k_star": 500,
+    "lambda_grid": [
+      0.0,
+      2.0
+    ],
+    "models": [
+      "gboost",
+      "logit",
+      "additive"
+    ],
+    "b": "mid",
+    "prevalence": 0.05,
+    "thresholds": [
+      0.0,
+      1.0
+    ],
+    "alpha": 0.1,
+    "bootstrap_B": 200,
+    "bootstrap_seed": null,
+    "workers": 4,
+    "out_dir": "_dev_smoke/timing_probe/e10_paired"
+  },
+  "provenance": {
+    "git_commit": "6cc9c49fa7ecbca995440f9d05afdd4435c34c76",
+    "git_dirty": false,
+    "python": "3.14.7",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "sklearn": "1.8.0",
+    "pandas": "2.3.3"
+  },
+  "lambda_grid": [
+    0.0,
+    2.0
+  ],
+  "mid_position": {
+    "anchors": {
+      "low": {
+        "lambda": 0.0,
+        "mismatched_fields": []
+      },
+      "mid": {
+        "lambda": 1.0,
+        "mismatched_fields": []
+      },
+      "high": {
+        "lambda": 2.0,
+        "mismatched_fields": []
+      }
+    },
+    "lambda_1_equals_mid": true,
+    "all_anchors_exact": true,
+    "straight_line_lambda_for_mid": {
+      "watchlist_tpr": 0.5428571428571429,
+      "watchlist_fpr": null,
+      "sar_lambda_launderer": 0.2727272727272728,
+      "sar_lambda_legit": 0.0,
+      "kyc_low_prob_launderer": 0.3750000000000001,
+      "kyc_low_prob_legit": 0.0,
+      "juris_beta_launderer[0]": 0.2666666666666666,
+      "juris_beta_launderer[1]": 0.5,
+      "juris_beta_legit[0]": 0.0,
+      "juris_beta_legit[1]": null,
+      "acct_age_mu_launderer": 1.0,
+      "acct_age_mu_legit": null,
+      "acct_age_sigma": null
+    },
+    "straight_line_collinear": false
+  },
+  "n_units": 4,
+  "n_ok": 4,
+  "failures": [],
+  "wall_seconds_total": 29.7558114528656,
+  "wall_seconds_per_unit": [
+    29.3033709526062,
+    29.287577867507935,
+    29.176589250564575,
+    29.286191940307617
+  ],
+  "failures_per_lambda": {
+    "0": 0,
+    "2": 0
+  },
+  "results": {
+    "gboost|T2_minus_T4": {
+      "per_lambda": [
+        {
+          "lam": 0.0,
+          "mean": 1.0,
+          "sd": 1.4142135623730951,
+          "R_ok": 2,
+          "ci_lo": -5.3137515148009316,
+          "ci_hi": 7.3137515148009316,
+          "half_width": 6.3137515148009316,
+          "alpha": 0.1
+        },
+        {
+          "lam": 2.0,
+          "mean": 25.0,
+          "sd": 8.48528137423857,
+          "R_ok": 2,
+          "ci_lo": -12.882509088805584,
+          "ci_hi": 62.882509088805584,
+          "half_width": 37.882509088805584,
+          "alpha": 0.1
+        }
+      ],
+      "break_even": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.0,
+          "flag_mean": "left_censored",
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              1.0,
+              25.0
+            ],
+            "sd": [
+              1.4142135623730951,
+              8.48528137423857
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -5.3137515148009316,
+              -12.882509088805584
+            ],
+            "ci_hi": [
+              7.3137515148009316,
+              62.882509088805584
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_finite": 200,
+              "n_left_censored": 147,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_finite": 106,
+              "n_left_censored": 53,
+              "n_not_reached": 94
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.0,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              1.0,
+              25.0
+            ],
+            "sd": [
+              1.4142135623730951,
+              8.48528137423857
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -5.3137515148009316,
+              -12.882509088805584
+            ],
+            "ci_hi": [
+              7.3137515148009316,
+              62.882509088805584
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.0,
+              "hi": 0.10526315789473684,
+              "n_finite": 200,
+              "n_left_censored": 53,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.0,
+              "hi": 0.10526315789473684,
+              "n_finite": 106,
+              "n_left_censored": 53,
+              "n_not_reached": 94
+            }
+          }
+        }
+      ]
+    },
+    "gboost|T2_minus_T3": {
+      "per_lambda": [
+        {
+          "lam": 0.0,
+          "mean": 0.5,
+          "sd": 2.1213203435596424,
+          "R_ok": 2,
+          "ci_lo": -8.970627272201396,
+          "ci_hi": 9.970627272201396,
+          "half_width": 9.470627272201396,
+          "alpha": 0.1
+        },
+        {
+          "lam": 2.0,
+          "mean": 18.5,
+          "sd": 7.7781745930520225,
+          "R_ok": 2,
+          "ci_lo": -16.22563333140512,
+          "ci_hi": 53.22563333140512,
+          "half_width": 34.72563333140512,
+          "alpha": 0.1
+        }
+      ],
+      "break_even": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.0,
+          "flag_mean": "left_censored",
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.5,
+              18.5
+            ],
+            "sd": [
+              2.1213203435596424,
+              7.7781745930520225
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -8.970627272201396,
+              -16.22563333140512
+            ],
+            "ci_hi": [
+              9.970627272201396,
+              53.22563333140512
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.0,
+              "hi": 0.14285714285714285,
+              "n_finite": 200,
+              "n_left_censored": 147,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.0,
+              "hi": 0.14285714285714285,
+              "n_finite": 106,
+              "n_left_censored": 53,
+              "n_not_reached": 94
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.05555555555555555,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.5,
+              18.5
+            ],
+            "sd": [
+              2.1213203435596424,
+              7.7781745930520225
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -8.970627272201396,
+              -16.22563333140512
+            ],
+            "ci_hi": [
+              9.970627272201396,
+              53.22563333140512
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.0,
+              "hi": 0.2857142857142857,
+              "n_finite": 200,
+              "n_left_censored": 53,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.0,
+              "hi": 0.2857142857142857,
+              "n_finite": 106,
+              "n_left_censored": 53,
+              "n_not_reached": 94
+            }
+          }
+        }
+      ]
+    },
+    "logit|T2_minus_T4": {
+      "per_lambda": [
+        {
+          "lam": 0.0,
+          "mean": -2.5,
+          "sd": 0.7071067811865476,
+          "R_ok": 2,
+          "ci_lo": -5.656875757400465,
+          "ci_hi": 0.6568757574004658,
+          "half_width": 3.1568757574004658,
+          "alpha": 0.1
+        },
+        {
+          "lam": 2.0,
+          "mean": 81.5,
+          "sd": 7.7781745930520225,
+          "R_ok": 2,
+          "ci_lo": 46.77436666859488,
+          "ci_hi": 116.22563333140512,
+          "half_width": 34.72563333140512,
+          "alpha": 0.1
+        }
+      ],
+      "break_even": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.05952380952380952,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": 0.21578263247852367,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -2.5,
+              81.5
+            ],
+            "sd": [
+              0.7071067811865476,
+              7.7781745930520225
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -5.656875757400465,
+              46.77436666859488
+            ],
+            "ci_hi": [
+              0.6568757574004658,
+              116.22563333140512
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.05128205128205128,
+              "hi": 0.06666666666666667,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.05128205128205128,
+              "hi": 0.21578263247852367,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.08333333333333333,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": 0.2539278281187552,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -2.5,
+              81.5
+            ],
+            "sd": [
+              0.7071067811865476,
+              7.7781745930520225
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -5.656875757400465,
+              46.77436666859488
+            ],
+            "ci_hi": [
+              0.6568757574004658,
+              116.22563333140512
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.07692307692307693,
+              "hi": 0.08888888888888889,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.07692307692307693,
+              "hi": 0.2539278281187552,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            }
+          }
+        }
+      ]
+    },
+    "logit|T2_minus_T3": {
+      "per_lambda": [
+        {
+          "lam": 0.0,
+          "mean": -1.5,
+          "sd": 0.7071067811865476,
+          "R_ok": 2,
+          "ci_lo": -4.656875757400465,
+          "ci_hi": 1.6568757574004658,
+          "half_width": 3.1568757574004658,
+          "alpha": 0.1
+        },
+        {
+          "lam": 2.0,
+          "mean": 71.0,
+          "sd": 4.242640687119285,
+          "R_ok": 2,
+          "ci_lo": 52.058745455597204,
+          "ci_hi": 89.9412545444028,
+          "half_width": 18.941254544402792,
+          "alpha": 0.1
+        }
+      ],
+      "break_even": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.041379310344827586,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": 0.16421845191156037,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -1.5,
+              71.0
+            ],
+            "sd": [
+              0.7071067811865476,
+              4.242640687119285
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -4.656875757400465,
+              52.058745455597204
+            ],
+            "ci_hi": [
+              1.6568757574004658,
+              89.9412545444028
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.028985507246376812,
+              "hi": 0.05263157894736842,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.028985507246376812,
+              "hi": 0.16421845191156037,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.06896551724137931,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": 0.1994821051560329,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -1.5,
+              71.0
+            ],
+            "sd": [
+              0.7071067811865476,
+              4.242640687119285
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              -4.656875757400465,
+              52.058745455597204
+            ],
+            "ci_hi": [
+              1.6568757574004658,
+              89.9412545444028
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.057971014492753624,
+              "hi": 0.07894736842105263,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.057971014492753624,
+              "hi": 0.1994821051560329,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            }
+          }
+        }
+      ]
+    },
+    "additive|T2_minus_T4": {
+      "per_lambda": [
+        {
+          "lam": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "R_ok": 2,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "half_width": 0.0,
+          "alpha": 0.1
+        },
+        {
+          "lam": 2.0,
+          "mean": 32.5,
+          "sd": 13.435028842544403,
+          "R_ok": 2,
+          "ci_lo": -27.48063939060885,
+          "ci_hi": 92.48063939060884,
+          "half_width": 59.98063939060885,
+          "alpha": 0.1
+        }
+      ],
+      "break_even": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.0,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              32.5
+            ],
+            "sd": [
+              0.0,
+              13.435028842544403
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              0.0,
+              -27.48063939060885
+            ],
+            "ci_hi": [
+              0.0,
+              92.48063939060884
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_finite": 106,
+              "n_left_censored": 0,
+              "n_not_reached": 94
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.06153846153846154,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              32.5
+            ],
+            "sd": [
+              0.0,
+              13.435028842544403
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              0.0,
+              -27.48063939060885
+            ],
+            "ci_hi": [
+              0.0,
+              92.48063939060884
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.047619047619047616,
+              "hi": 0.08695652173913043,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.047619047619047616,
+              "hi": 0.08695652173913043,
+              "n_finite": 106,
+              "n_left_censored": 0,
+              "n_not_reached": 94
+            }
+          }
+        }
+      ]
+    },
+    "additive|T2_minus_T3": {
+      "per_lambda": [
+        {
+          "lam": 0.0,
+          "mean": 0.0,
+          "sd": 0.0,
+          "R_ok": 2,
+          "ci_lo": 0.0,
+          "ci_hi": 0.0,
+          "half_width": 0.0,
+          "alpha": 0.1
+        },
+        {
+          "lam": 2.0,
+          "mean": 24.5,
+          "sd": 6.363961030678928,
+          "R_ok": 2,
+          "ci_lo": -3.911881816604197,
+          "ci_hi": 52.91188181660419,
+          "half_width": 28.411881816604197,
+          "alpha": 0.1
+        }
+      ],
+      "break_even": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.0,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              24.5
+            ],
+            "sd": [
+              0.0,
+              6.363961030678928
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              0.0,
+              -3.911881816604197
+            ],
+            "ci_hi": [
+              0.0,
+              52.91188181660419
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.0,
+              "hi": 0.0,
+              "n_finite": 106,
+              "n_left_censored": 0,
+              "n_not_reached": 94
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "lambda_star_mean",
+          "secondary": "lambda_star_LB",
+          "lambda_star_mean": 0.08163265306122448,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "lambda_star_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              24.5
+            ],
+            "sd": [
+              0.0,
+              6.363961030678928
+            ],
+            "n": [
+              2,
+              2
+            ],
+            "ci_lo": [
+              0.0,
+              -3.911881816604197
+            ],
+            "ci_hi": [
+              0.0,
+              52.91188181660419
+            ]
+          },
+          "bootstrap": {
+            "B": 200,
+            "seed": 700411,
+            "level": 0.9,
+            "mean": {
+              "lo": 0.06896551724137931,
+              "hi": 0.1,
+              "n_finite": 200,
+              "n_left_censored": 0,
+              "n_not_reached": 0
+            },
+            "LB": {
+              "lo": 0.06896551724137931,
+              "hi": 0.1,
+              "n_finite": 106,
+              "n_left_censored": 0,
+              "n_not_reached": 94
+            }
+          }
+        }
+      ]
+    }
+  }
+}
