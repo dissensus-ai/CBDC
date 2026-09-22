@@ -1,4 +1,4 @@
-# Noisy-linkage arm: design
+# Noisy-linkage arm (E11): design
 
 **Tier: exploratory scaffolding.** The code in this directory is built and tested.
 No result exists. The only outputs so far are DEV-seed smoke runs
@@ -14,10 +14,17 @@ Files:
 |---|---|
 | `noisy_linkage.py` | corruption operator, cluster table (labels + attribute attachment), observed-cluster features, the two scoring rules |
 | `run_noisy_linkage.py` | seed guard, grid, one replicate over all cells, t-interval summary, driver |
-| `test_noisy_linkage.py` | 39 tests (see §11) |
+| `test_noisy_linkage.py` | 49 tests (see §11) |
 | `_dev_smoke_linkage/` | DEV smoke output, not reportable |
 
-## 1. Question and estimands
+## 1. Scope, question and estimands
+
+**Scope: semi-oracle attachment.** Identity attributes are attached through TRUE
+wallet ownership, even when the behavioural clusters are corrupted. E11 therefore
+tests noisy *aggregation* with stipulated access to customer attributes. It does not
+test identity discovery or linkage repair: no rule here recovers a customer record
+from a corrupted cluster, and no result from this arm may be described as if the
+detector found or repaired identities.
 
 The confirmatory pipeline treats wallet→entity linkage as an oracle: T2 aggregates
 over each entity's true wallet set. A deployed resolver makes errors. The question
@@ -41,13 +48,27 @@ worlds, for `gboost` (L3) and `logit` (L0), under each scoring rule r ∈
   Positive means the identity increment is larger under corrupted linkage than
   under the oracle, which is identity substituting for linkage. `growth_T2_minus_T3_vs_oracle`
   is the attribute-only version.
-- `T2_degradation_vs_oracle(ε) = missed_T2(ε) − missed_T2(0,0)`: what the linkage
-  errors cost the pseudonymous tier.
+- **Absolute deterioration, every tier**, paired within replicate:
+  `T{2,3,4}_degradation_vs_oracle(ε) = missed_T{k}(ε) − missed_T{k}(0,0)`. These
+  sit next to G in the primary summary block (`summary_primary.csv`, columns
+  `G_T4, G_T3, deg_T2, deg_T3, deg_T4`), not in an appendix. G is a difference of
+  differences, so G = 0 can coexist with T2 and T4 both getting much worse; the
+  degradation curves are what show that.
+
+**Interpretation.** A G contrast compatible with zero provides no clear evidence
+that linkage corruption changes the incremental value of the auxiliary information
+under this design; it says nothing about the stability of detection performance,
+which the absolute degradation curves show. A positive G means the auxiliary block
+is worth more under corrupted linkage than under the oracle; it does not by itself
+say the auxiliary tiers are robust, since both can deteriorate.
 
 Each quantity is summarised by the mean over successful replicates with a two-sided
 90% Student-t interval (`inference.mean_ci`, alpha = 0.10), the interval the
 confirmatory pipeline uses. Paired differences against the oracle cell use the same
 worlds and the same corruption streams (§3.4), so between-world variation cancels.
+Every interval is reported with its achieved half-width. R = 52 matches the
+confirmatory replicate count, not its precision; achieved interval widths are
+reported.
 
 ## 2. Replicate structure
 
@@ -65,8 +86,8 @@ s + 10,000,003, both passed to `replicate._world` (default DGP config, `mid/mid`
 The training world is corrupted too. A supervisor learns from case outcomes on the
 clusters its own resolver produced. Training on oracle entities and testing on noisy
 clusters would measure distribution shift, not operation under a noisy resolver. The
-alternative (oracle train, noisy test) is a one-flag change if the addendum wants
-it as a secondary contrast.
+alternative (oracle train, noisy test) is not built; it would be a small driver
+option if the addendum wants it as a secondary contrast.
 
 The degeneracy audit runs once per replicate on the **oracle** training world,
 exactly as in `confirmatory/replicate.py`. The audit is a check on the generator.
@@ -185,15 +206,16 @@ then every wallet carries its customer's credential, and credential-keyed linkag
 would have no errors at all. Noisy linkage only arises when clusters come from a
 heuristic resolver, *not* from credentials. In that case the scoring service holds a
 cluster and has to look up attributes wallet by wallet, and a merged cluster maps to
-several customer records. Three rules are implemented:
+several customer records. Four rules are implemented:
 
 | rule | definition | reading |
 |---|---|---|
-| `max_risk` (**default**) | riskiest member value per attribute: min `kyc_tier`, min `account_age_days`, max `prior_sar_count`, max `jurisdiction_risk`, `on_watchlist` = any | v3 §7.1's freeze candidate. The service escalates on any linked customer's risk flags. This is what a risk-averse lookup does. |
+| `attrwise_max_risk` (**default**; deprecated alias `max_risk`) | riskiest value *per attribute, taken separately*: min `kyc_tier`, min `account_age_days`, max `prior_sar_count`, max `jurisdiction_risk`, `on_watchlist` = any | v3 §7.1's freeze candidate. The service escalates on any linked customer's risk flags. Because each attribute takes its own extreme, a merged cluster can carry a profile **no single member has** (e.g. one member's watchlist bit with another's SAR count). |
+| `riskiest_member` | the whole attribute vector of the ONE member ranking first under a transparent lexicographic score: `on_watchlist` (1 first), then `prior_sar_count` (higher first), `kyc_tier` (lower first), `jurisdiction_risk` (higher first), `account_age_days` (younger first), finally the lower entity-table row | Escalate on the single riskiest linked customer, but keep that customer's record intact. Always equals some real member's row (tested). Available; not in the pre-specified bracket unless the addendum adds it. |
 | `majority` | attributes of the true entity contributing the most wallets (ties: lowest entity index) | The cluster is treated as "belonging to" its dominant customer. This was the team-lead brief's suggestion. |
 | `first_wallet` | attributes of the entity owning the cluster's lowest-index wallet | The record inherited by a resolver keyed on its first-seen wallet, i.e. the earliest-issued credential. |
 
-`max_risk` is the default because v3 §7.1 already names it as the freeze candidate,
+`attrwise_max_risk` is the default because v3 §7.1 already names it as the freeze candidate,
 and moving the default away from pre-written protocol text needs an explicit
 amendment. **It has a direction, and that direction matters for the key question.**
 Under merges, `on_watchlist = any` lights up every cluster that contains a
@@ -203,7 +225,17 @@ favours positive `growth_T2_minus_T4`. `majority` does the opposite: a small ill
 entity merged into a large legitimate one loses its attributes entirely. So the
 answer to "does identity substitute for broken linkage?" may depend on this rule.
 The addendum must either freeze one rule with this caveat attached, or pre-specify
-both `max_risk` and `majority` as a bracketing pair.
+both `attrwise_max_risk` and `majority` as a bracketing pair. The driver now runs
+several rules in one invocation (`--attr-rules`), on the SAME corrupted partitions,
+and its default is that bracket. On a split-only cell there are no merged clusters,
+so every rule gives identical numbers there by construction.
+
+Toy case (test `test_attrwise_and_riskiest_member_differ_on_merge`): E0 is
+watchlisted with a clean record (KYC 2, age 900, 0 SARs, jurisdiction 0.2); E1 is
+unlisted with KYC 0, age 50, 5 SARs, jurisdiction 0.8; both are merged into one
+cluster. `attrwise_max_risk` gives (KYC 0, age 50, SARs 5, jur 0.8, watchlist 1),
+a profile neither has; `riskiest_member` gives E0's row, because the watchlist bit
+ranks first; `majority` gives E1's row (two wallets to one).
 
 ## 6. Training labels
 
@@ -295,32 +327,50 @@ reserved for the concurrent two-stage arm.
 
 `--out-dir` receives:
 
-- `config.json`: every argument, the grid, `dev_seeds`, and the addendum-lock path.
+- `run_spec.json`: the single run-spec dict, i.e. every field an addendum lock
+  pins: `arm` ("E11"), `seed_base, R, n_train, n_test, k_star, test_offset,
+  grid_name, eps, grid` (list of `[split_mode, eps_split, eps_merge]`),
+  `split_mode, merge_mode, attr_rules, models, scoring_rules, coverage_min_frac,
+  alpha, dev_seeds, addendum_lock, requirements_sha256` (of
+  `detection/requirements.txt`), `commit`, `commit_dirty` (true if `detection/` had
+  uncommitted changes, in which case `commit` does not identify the code). The key names follow the E9–E11 lock
+  schema on `exp/two-stage-signal` (`addendum_lock.py`: `arm, seed_base, R, grid,
+  models`), so that lock can be adopted after the branches merge; note that `grid`
+  here is a list of cells, not a list of floats, and the lock's exact-match must
+  take that into account. The seed guard in this driver stays in place until then.
 - `records.jsonl`: one line per replicate, written as it completes. Fields:
   `replicate_id, train_seed, test_seed, status, [error, traceback], audit{gate1_pass,
   gate2_pass, worst_feature, worst_auc}, N_positive_test, k, seconds, cells[]`. Each
-  cell holds `eps_split, eps_merge, linkage_train{…}, linkage_test{…},
-  train_cluster_prevalence, seconds, models{gboost|logit: {T2|T3|T4: {coverage|conservative:
-  {TP, MissedPer10k, k_eff}}, delta_T2_minus_T4_{rule}, delta_T2_minus_T3_{rule}}}`.
-- `summary.csv`: long format, one row per `(eps_split, eps_merge, model, rule,
-  quantity)`, with columns `mean, sd, R_ok, ci_lo, ci_hi`. The quantities are
-  `missed_T2, missed_T3, missed_T4, delta_T2_minus_T4, delta_T2_minus_T3,
-  growth_T2_minus_T4_vs_oracle, growth_T2_minus_T3_vs_oracle,
-  T2_degradation_vs_oracle, linkage_test_frac_entities_split,
-  linkage_test_frac_entities_in_merged_cluster`. The key contrast is the two
-  `growth_*` rows.
+  cell holds `split_mode, eps_split, eps_merge, linkage_train{…}, linkage_test{…},
+  seconds, attr{<attr_rule>: {train_cluster_prevalence, models{gboost|logit:
+  {T2|T3|T4: {coverage|conservative: {TP, MissedPer10k, k_eff}},
+  delta_T2_minus_T4_{rule}, delta_T2_minus_T3_{rule}}}}}`.
+- **`summary_primary.csv` (the primary block)**: one row per `(split_mode,
+  eps_split, eps_merge, attr_rule, model, rule)` with `R_ok` and, for each of
+  `G_T4` (= growth_T2_minus_T4_vs_oracle), `G_T3`, `deg_T2`, `deg_T3`, `deg_T4`
+  (= T{k}_degradation_vs_oracle), the columns `_mean, _ci_lo, _ci_hi,
+  _half_width` (paired 90% t-intervals), plus `realised_frac_entities_split` and
+  `realised_frac_entities_in_merged_cluster` (test world, mean over replicates).
+  G is never shown without the three deterioration curves beside it. The driver
+  also prints this block for gboost/conservative at the end of a run.
+- `summary.csv`: long format, one row per `(split_mode, eps_split, eps_merge,
+  attr_rule, model, rule, quantity)`, with columns `mean, sd, R_ok, ci_lo, ci_hi,
+  half_width`. Quantities: `missed_T2, missed_T3, missed_T4, delta_T2_minus_T4,
+  delta_T2_minus_T3, growth_T2_minus_T4_vs_oracle, growth_T2_minus_T3_vs_oracle,
+  T2_degradation_vs_oracle, T3_degradation_vs_oracle, T4_degradation_vs_oracle,
+  linkage_test_frac_entities_split, linkage_test_frac_entities_in_merged_cluster`.
 - `timing.json`: wall time, workers, seconds per replicate, mean seconds per cell.
 
 ## 11. Tests
 
 ```bash
-cd detection/exploratory && python3 -m pytest test_noisy_linkage.py   # 39 tests
+cd detection/exploratory && python3 -m pytest test_noisy_linkage.py   # 49 tests
 ```
 
 Coverage:
 
 - ε = 0 identity: partition, feature matrix and labels, across 2 split modes × 2
-  merge modes × 3 attribute rules.
+  merge modes × 4 attribute rules.
 - Scoring at ε = 0 equals `endpoint.missed_per_10k`, ties included.
 - The oracle cell equals `confirmatory/replicate.run_replicate` exactly.
 - Determinism.
@@ -335,7 +385,13 @@ Coverage:
   20260707 refused; the lock accepted, a wrong base and a missing file refused;
   spent seeds refused even with a lock; the test stream checked; the sklearn ceiling
   enforced; a refused driver run creates nothing.
-- Grid construction.
+- Grid construction, including `axes+v2` (17 cells, one shared oracle).
+- Attribute rules: `attrwise_max_risk` and `riskiest_member` differ on a toy merge;
+  `riskiest_member` always equals a real member's row (property check over
+  corrupted worlds); its tiebreak order; the `max_risk` alias.
+- The oracle cell matches the confirmatory replicate under every attribute rule.
+- End to end: the driver writes `run_spec.json` with every lock field, and the
+  primary block with G and all three degradation curves (zero at the oracle).
 
 The existing suite still passes: `confirmatory/` 26 tests, `test_pipeline.py` 2
 tests.
@@ -349,13 +405,13 @@ tests.
    label-correlated merge mode should be built and pre-specified.
 3. **Order of operations**: splits before merges, merges drawn from the post-split
    partition, transitive composition.
-4. **Grid**: ε values and shape. The default is `axes`, which gives 13 cells: the
-   oracle, the split axis, the merge axis, and the diagonal over {0.05, 0.10, 0.20,
-   0.30}. The alternative is the `full` 5×5 factorial. v2 §6 named {0.05, 0.15}²
-   plus the oracle, so the choice must be reconciled with that.
-5. **Attribute attachment rule**: `max_risk` alone (v3 §7.1), or `max_risk` and
-   `majority` as a pre-specified bracket (§5 explains why this can decide the
-   answer).
+4. **Grid**: proposed `axes+v2` (17 cells): the 13-cell per-wallet `axes` grid
+   (oracle, split axis, merge axis, diagonal over {0.05, 0.10, 0.20, 0.30}) plus the
+   carried-over v2 §6 subset (bipartition splits × uniform merges at
+   {0.05, 0.15}²), sharing one oracle. The `full` 5×5 factorial stays available.
+5. **Attribute attachment rule**: proposed bracket `attrwise_max_risk` +
+   `majority` (§5 explains why this can decide the answer). `riskiest_member` is
+   implemented but outside the bracket unless the addendum adds it.
 6. **Training label**: any-member (E5; already frozen there, restate).
 7. **Train-world corruption**: corrupted at the same ε (default), or oracle-train as
    a secondary contrast.
@@ -390,33 +446,41 @@ OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 \
   ../../.venv/bin/python run_noisy_linkage.py \
     --seed-base S --R 52 --addendum-lock <path/to/addendum-lock> \
     --n-train 8000 --n-test 10000 --k-star 500 \
-    --eps 0 0.05 0.10 0.20 0.30 --grid axes \
-    --split-mode wallet --merge-mode uniform --attr-rule max_risk \
+    --eps 0 0.05 0.10 0.20 0.30 --grid axes+v2 \
+    --split-mode wallet --merge-mode uniform \
+    --attr-rules attrwise_max_risk majority --models gboost logit \
     --coverage-min-frac 0 --workers 8 \
     --out-dir results_noisy_linkage/<addendum-id>
 ```
 
-Repeat with `--attr-rule majority` into a separate `--out-dir` if §12.5 brackets.
-The same seed base is allowed there because it runs the same worlds under a different
-rule. Always use a fresh output directory. The driver refuses to overwrite one.
+One invocation runs both grids (the 13 per-wallet cells and the 5 v2 cells, one
+shared oracle) and both bracket rules on the same corrupted partitions. Always use a
+fresh output directory; the driver refuses to overwrite one. R = 52 matches the
+confirmatory replicate count, not its precision; achieved interval widths are
+reported (`*_half_width`).
 
 ## 14. Timing and full-run estimate
 
 Measured with the pinned environment (Python 3.14.0, sklearn 1.8.0), one thread per
 worker, on PurrPower (Ryzen 9 9900X, 24 threads):
 
-| run | per replicate (13 cells) | per cell |
+| run | per replicate | per cell |
 |---|---|---|
 | DEV smoke, n_train = n_test = 2,000, R = 3, 3 workers | 21.0–21.3 s | 1.3 s |
 | timing probe, n_train = 8,000, n_test = 10,000, R = 2, 2 workers (DEV 700990–700991; outputs discarded) | 93.1–93.2 s | ≈ 7.2 s |
 | same size, `counterparty` merges, R = 1 (DEV 700992; discarded) | 95.5 s | ≈ 7.3 s |
+| **proposed reported configuration**: same size, `axes+v2` (17 cells) × 2 attribute rules, R = 2, 2 workers (DEV 700990–700991; discarded; after the pre-freeze fixes) | 206.1–206.2 s | ≈ 10.9 s (both rules) |
+
+The first three rows predate the pre-freeze fixes and ran one attribute rule on the
+13-cell grid.
 
 Scaling from the smoke alone (≈ 4.5× for 4.5× the entities) predicts ≈ 95 s per
 replicate, which agrees with the probe.
 
-**Full reported run, R = 52, n_train = 8,000, n_test = 10,000, 13-cell grid, 8
-workers:** 7 waves × ≈ 95 s ≈ **11–12 min** of wall time (about 80 CPU-minutes). The
-`full` 25-cell factorial is ≈ 180 s per replicate, or ≈ 21–23 min. At n_train =
-10,000, add about 10%. Each attribute-rule bracket doubles the total. Peak memory
+**Full reported run as proposed in §13** (R = 52, n_train = 8,000, n_test = 10,000,
+`axes+v2`, attribute bracket of two rules, 8 workers): 7 waves × ≈ 210 s ≈
+**25 min** of wall time (about 180 CPU-minutes). One rule on the 13-cell grid alone
+is ≈ 95 s per replicate, ≈ 11–12 min. The `full` 25-cell factorial with two rules
+would be ≈ 360 s per replicate, ≈ 42 min. At n_train = 10,000, add about 10%. Peak memory
 measured at ≈ 950 MB RSS for one full-size replicate (DEV 700993, discarded), so
 8 workers need ≈ 8 GB.

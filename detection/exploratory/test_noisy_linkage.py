@@ -170,7 +170,7 @@ def test_cluster_label_any_member_and_attr_rules():
     # E0 has 3 wallets, E1 has 1, E2 has 1; cluster 0 = E0(3) + E1(1),
     # cluster 1 = E2
     link = _link([0, 0, 0, 0, 1], [0, 0, 0, 1, 2])
-    mx = nl.cluster_table(ents, link, "max_risk")
+    mx = nl.cluster_table(ents, link, "attrwise_max_risk")
     assert mx.is_launderer.tolist() == [1, 0]           # any member illicit
     assert mx.loc[0, "kyc_tier"] == 1
     assert mx.loc[0, "account_age_days"] == 100.0
@@ -317,8 +317,15 @@ def test_driver_refuses_non_dev_seed(tmp_path):
 
 def test_grid():
     g = run.eps_grid((0, 0.1, 0.2), "axes")
-    assert g[0] == (0.0, 0.0) and len(g) == 7 and (0.2, 0.2) in g
+    assert g[0] == ("wallet", 0.0, 0.0) and len(g) == 7
+    assert ("wallet", 0.2, 0.2) in g
     assert len(run.eps_grid((0, 0.1, 0.2), "full")) == 9
+    v2 = run.eps_grid(kind="v2")
+    assert len(v2) == 5 and all(c[0] == "bipartition" for c in v2[1:])
+    both = run.eps_grid(kind="axes+v2")
+    assert len(both) == 17                          # ONE shared oracle
+    assert sum(1 for c in both if c[1] == c[2] == 0.0) == 1
+    assert ("bipartition", 0.15, 0.05) in both
 
 
 # ---------------------------------------------------------------------------
@@ -330,11 +337,130 @@ def test_oracle_cell_matches_confirmatory_replicate():
     tr, te = 700502, 700502 + run.SEED_OFFSET
     kw = dict(n_train=600, n_test=600, k_star=500)
     ref = run_replicate(0, tr, te, **kw)
-    mine = run.run_linkage_replicate(0, tr, te, cells=[(0.0, 0.0)], **kw)
+    mine = run.run_linkage_replicate(0, tr, te, cells=[("wallet", 0.0, 0.0)],
+                                     attr_rules=nl.ATTR_RULES, **kw)
     assert ref["status"] == mine["status"] == "OK"
-    cell = mine["cells"][0]["models"]
+    for attr_rule in nl.ATTR_RULES:
+        _assert_matches(ref, mine["cells"][0]["attr"][attr_rule]["models"])
+
+
+def _assert_matches(ref, cell):
     for m in run.MODELS:
         for t in run.TIERS:
             for rule in run.RULES:
                 assert (cell[m][t][rule]["MissedPer10k"]
                         == ref["models"][m][t]["MissedPer10k"])
+
+
+# ---------------------------------------------------------------------------
+# attribute rules: attribute-wise extreme vs the riskiest real member
+# ---------------------------------------------------------------------------
+
+def _rule_toy():
+    # E0 watchlisted but clean record otherwise; E1 unlisted with 5 SARs,
+    # lowest KYC tier, youngest account. Both merged into cluster 0.
+    ents = pd.DataFrame({
+        "entity_id": ["E0", "E1", "E2"],
+        "is_launderer": [0, 1, 0],
+        "kyc_tier": [2, 0, 1],
+        "account_age_days": [900.0, 50.0, 300.0],
+        "prior_sar_count": [0, 5, 0],
+        "jurisdiction_risk": [0.2, 0.8, 0.4],
+        "on_watchlist": [1, 0, 0],
+    })
+    return ents, _link([0, 0, 0, 1], [0, 1, 1, 2])
+
+
+def test_attrwise_and_riskiest_member_differ_on_merge():
+    ents, link = _rule_toy()
+    aw = nl.cluster_table(ents, link, "attrwise_max_risk")
+    rm = nl.cluster_table(ents, link, "riskiest_member")
+    cols = list(nl.ATTR_COLS)
+    # attribute-wise: watchlist from E0, SARs/KYC/age/jurisdiction from E1 --
+    # a profile neither member has
+    assert aw.loc[0, cols].tolist() == [0, 50.0, 5, 0.8, 1]
+    for e in range(2):
+        assert aw.loc[0, cols].tolist() != ents.loc[e, cols].tolist()
+    # riskiest member: watchlist bit ranks first, so E0's whole row
+    assert rm.loc[0, cols].tolist() == ents.loc[0, cols].tolist()
+    assert aw.loc[0, cols].tolist() != rm.loc[0, cols].tolist()
+    # a singleton cluster is itself under both
+    assert aw.loc[1, cols].tolist() == rm.loc[1, cols].tolist() \
+        == ents.loc[2, cols].tolist()
+
+
+def test_riskiest_member_tiebreak_order():
+    # no watchlist: SAR count decides; equal SARs: lower KYC tier decides
+    ents, link = _rule_toy()
+    ents = ents.assign(on_watchlist=0)
+    assert nl.cluster_table(ents, link, "riskiest_member").loc[
+        0, "prior_sar_count"] == 5
+    ents = ents.assign(prior_sar_count=0, kyc_tier=[0, 1, 1])
+    assert nl.cluster_table(ents, link, "riskiest_member").loc[
+        0, "account_age_days"] == 900.0
+
+
+def test_riskiest_member_is_always_a_real_member_row(world):
+    data, _, _ = world
+    ent = data["entities"].reset_index(drop=True)
+    cols = list(nl.ATTR_COLS)
+    for seed in range(3):
+        link = nl.corrupt_linkage(data["wallets"], eps_split=0.3,
+                                  eps_merge=0.4, seed=seed)
+        rm = nl.cluster_table(ent, link, "riskiest_member")
+        members = pd.DataFrame({"c": link.wallet_cluster,
+                                "e": link.wallet_entity}).drop_duplicates()
+        for c, g in members.groupby("c"):
+            rows = ent.loc[g.e.to_numpy(), cols].to_numpy()
+            assert (rows == rm.loc[c, cols].to_numpy(dtype=float)).all(
+                axis=1).any()
+
+
+def test_max_risk_alias_still_works():
+    ents, link = _rule_toy()
+    pd.testing.assert_frame_equal(
+        nl.cluster_table(ents, link, "max_risk"),
+        nl.cluster_table(ents, link, "attrwise_max_risk"))
+    assert nl.canonical_attr_rule("max_risk") == "attrwise_max_risk"
+    with pytest.raises(ValueError):
+        nl.canonical_attr_rule("nope")
+
+
+# ---------------------------------------------------------------------------
+# end to end: run spec and the primary summary block
+# ---------------------------------------------------------------------------
+
+def test_driver_writes_spec_and_primary_block(tmp_path):
+    out = tmp_path / "o"
+    run.main(["--seed-base", "700998", "--R", "2", "--n-train", "400",
+              "--n-test", "400", "--grid", "v2", "--models", "logit",
+              "--attr-rules", "max_risk", "majority", "--workers", "2",
+              "--out-dir", str(out)])
+    import json
+    spec = json.loads((out / "run_spec.json").read_text())
+    for f in ("arm", "seed_base", "R", "n_train", "n_test", "k_star",
+              "test_offset", "split_mode", "merge_mode", "attr_rules",
+              "grid", "models", "requirements_sha256"):
+        assert f in spec
+    assert spec["attr_rules"] == ["attrwise_max_risk", "majority"]
+    assert spec["n_train"] == 400 and spec["test_offset"] == run.SEED_OFFSET
+    assert len(spec["grid"]) == 5 and spec["models"] == ["logit"]
+    prim = pd.read_csv(out / "summary_primary.csv")
+    for short, _ in run.PRIMARY_QUANTITIES:
+        for f in ("mean", "ci_lo", "ci_hi", "half_width"):
+            assert f"{short}_{f}" in prim.columns
+    assert set(prim.attr_rule) == {"attrwise_max_risk", "majority"}
+    assert len(prim) == 5 * 2 * 1 * 2       # cells x attr x models x rules
+    orc = prim[(prim.eps_split == 0) & (prim.eps_merge == 0)]
+    for short in ("G_T4", "G_T3", "deg_T2", "deg_T3", "deg_T4"):
+        assert (orc[f"{short}_mean"] == 0).all()   # paired vs itself
+    longf = pd.read_csv(out / "summary.csv")
+    assert {"T3_degradation_vs_oracle", "T4_degradation_vs_oracle"} <= set(
+        longf.quantity)
+
+
+def test_default_run_spec_sizes():
+    a = run.build_parser().parse_args(["--seed-base", "700501", "--R", "1",
+                                       "--out-dir", "x"])
+    assert (a.n_train, a.n_test, a.k_star) == (8000, 10000, 500)
+    assert a.attr_rules == ["attrwise_max_risk", "majority"]

@@ -43,7 +43,25 @@ from endpoint import select_alerts  # noqa: E402
 
 SPLIT_MODES = ("wallet", "bipartition")
 MERGE_MODES = ("uniform", "counterparty")
-ATTR_RULES = ("max_risk", "majority", "first_wallet")
+ATTR_RULES = ("attrwise_max_risk", "riskiest_member", "majority",
+              "first_wallet")
+# deprecated spelling -> current name (kept so old commands still run)
+ATTR_RULE_ALIASES = {"max_risk": "attrwise_max_risk"}
+
+# riskiest_member ordering: lexicographic, most decisive first. Each key is
+# (column, ascending?) where "ascending" means a LOWER value is riskier.
+RISK_ORDER = (("on_watchlist", False), ("prior_sar_count", False),
+              ("kyc_tier", True), ("jurisdiction_risk", False),
+              ("account_age_days", True))
+
+
+def canonical_attr_rule(rule: str) -> str:
+    """Resolve a deprecated alias; reject unknown rules."""
+    rule = ATTR_RULE_ALIASES.get(rule, rule)
+    if rule not in ATTR_RULES:
+        raise ValueError(f"attr_rule must be one of {ATTR_RULES} "
+                         f"(or alias {tuple(ATTR_RULE_ALIASES)})")
+    return rule
 
 # Stream tag so the corruption RNG never coincides with the DGP's own stream
 # for the same world seed ("LINK" in ASCII).
@@ -247,7 +265,8 @@ def corrupt_linkage(wallets, *, eps_split, eps_merge, seed,
     return Linkage(obs, e_idx, n_obs, stats)
 
 
-def cluster_table(entities, link: Linkage, attr_rule="max_risk") -> pd.DataFrame:
+def cluster_table(entities, link: Linkage,
+                  attr_rule="attrwise_max_risk") -> pd.DataFrame:
     """One row per observed cluster, in the entity-table schema.
 
     Label: a cluster is illicit iff ANY member wallet belongs to an illicit
@@ -258,20 +277,27 @@ def cluster_table(entities, link: Linkage, attr_rule="max_risk") -> pd.DataFrame
     Identity attributes live on true entities. The rule for a cluster that
     spans several (semi-oracle attachment -- no identity is "discovered"):
 
-      max_risk     (default; protocol v3 section 7.1 freeze candidate)
-                   riskiest member value per attribute: minimum kyc_tier,
-                   minimum account_age_days, maximum prior_sar_count,
-                   maximum jurisdiction_risk, on_watchlist = any member.
+      attrwise_max_risk  (default; protocol v3 section 7.1 freeze candidate;
+                   deprecated alias "max_risk") riskiest value PER ATTRIBUTE,
+                   taken independently: minimum kyc_tier, minimum
+                   account_age_days, maximum prior_sar_count, maximum
+                   jurisdiction_risk, on_watchlist = any member. A merged
+                   cluster can therefore carry a profile NO member has.
+      riskiest_member  the whole attribute vector of ONE member: the member
+                   ranking first under RISK_ORDER -- on_watchlist (1 first),
+                   then prior_sar_count (higher first), kyc_tier (lower
+                   first), jurisdiction_risk (higher first), account_age_days
+                   (lower first), finally lowest entity index. Always equals
+                   some real member's row.
       majority     attributes of the true entity contributing the most
                    wallets to the cluster (ties: lowest entity index).
       first_wallet attributes of the entity owning the cluster's lowest-index
                    wallet -- the earliest-issued credential, i.e. the record
                    a resolver keyed on its first wallet would inherit.
 
-    All three return the entity's own attributes for a one-entity cluster.
+    All four return the entity's own attributes for a one-entity cluster.
     """
-    if attr_rule not in ATTR_RULES:
-        raise ValueError(f"attr_rule must be one of {ATTR_RULES}")
+    attr_rule = canonical_attr_rule(attr_rule)
     ent = entities.reset_index(drop=True)
     e_row = pd.Series(np.arange(len(ent)),
                       index=_ids_to_int(ent.entity_id))
@@ -285,14 +311,20 @@ def cluster_table(entities, link: Linkage, attr_rule="max_risk") -> pd.DataFrame
 
     out = pd.DataFrame(index=pd.RangeIndex(link.n_clusters, name="c"))
     out["is_launderer"] = g.is_launderer.max().astype(int)
-    if attr_rule == "max_risk":
+    if attr_rule == "attrwise_max_risk":
         out["kyc_tier"] = g.kyc_tier.min()
         out["account_age_days"] = g.account_age_days.min()
         out["prior_sar_count"] = g.prior_sar_count.max()
         out["jurisdiction_risk"] = g.jurisdiction_risk.max()
         out["on_watchlist"] = g.on_watchlist.max()
     else:
-        if attr_rule == "majority":
+        if attr_rule == "riskiest_member":
+            mem = m.drop_duplicates(["c", "row"])
+            keys = ["c"] + [k for k, _ in RISK_ORDER] + ["row"]
+            asc = [True] + [a for _, a in RISK_ORDER] + [True]
+            pick = mem.sort_values(keys, ascending=asc).drop_duplicates(
+                "c").set_index("c").row
+        elif attr_rule == "majority":
             cnt = m.groupby(["c", "row"]).size().rename("n").reset_index()
             cnt = cnt.sort_values(["c", "n", "row"], ascending=[True, False,
                                                                 True])
@@ -309,7 +341,7 @@ def cluster_table(entities, link: Linkage, attr_rule="max_risk") -> pd.DataFrame
 
 
 def observed_entity_features(data, wallet_feats, link: Linkage,
-                             attr_rule="max_risk"):
+                             attr_rule="attrwise_max_risk"):
     """T2-T4 features on observed clusters, via unchanged features.py code.
 
     features.build_entity_features only ever sees `entity_id` columns; handing
