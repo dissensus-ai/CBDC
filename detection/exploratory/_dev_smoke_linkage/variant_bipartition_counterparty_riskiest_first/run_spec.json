@@ -1,0 +1,105 @@
+{
+  "arm": "E11",
+  "seed_base": 700504,
+  "R": 2,
+  "n_train": 2000,
+  "n_test": 2000,
+  "k_star": 500,
+  "test_offset": 10000003,
+  "grid_name": "axes",
+  "eps": [
+    0.0,
+    0.05,
+    0.1,
+    0.2,
+    0.3
+  ],
+  "grid": [
+    [
+      "bipartition",
+      0.0,
+      0.0
+    ],
+    [
+      "bipartition",
+      0.05,
+      0.0
+    ],
+    [
+      "bipartition",
+      0.0,
+      0.05
+    ],
+    [
+      "bipartition",
+      0.05,
+      0.05
+    ],
+    [
+      "bipartition",
+      0.1,
+      0.0
+    ],
+    [
+      "bipartition",
+      0.0,
+      0.1
+    ],
+    [
+      "bipartition",
+      0.1,
+      0.1
+    ],
+    [
+      "bipartition",
+      0.2,
+      0.0
+    ],
+    [
+      "bipartition",
+      0.0,
+      0.2
+    ],
+    [
+      "bipartition",
+      0.2,
+      0.2
+    ],
+    [
+      "bipartition",
+      0.3,
+      0.0
+    ],
+    [
+      "bipartition",
+      0.0,
+      0.3
+    ],
+    [
+      "bipartition",
+      0.3,
+      0.3
+    ]
+  ],
+  "split_mode": "bipartition",
+  "merge_mode": "counterparty",
+  "attr_rules": [
+    "riskiest_member",
+    "first_wallet"
+  ],
+  "models": [
+    "gboost",
+    "logit"
+  ],
+  "scoring_rules": [
+    "coverage",
+    "conservative"
+  ],
+  "coverage_min_frac": 0.0,
+  "alpha": 0.1,
+  "dev_seeds": true,
+  "addendum_lock": null,
+  "requirements_sha256": "076bbb2aa785640cb6a6ac2e091653655b05a04d007996af085851038c632520",
+  "commit": "8b893445b94a68f827b46e53361c71fb96829624",
+  "commit_dirty": false
+}

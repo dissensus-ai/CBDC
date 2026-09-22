@@ -1,0 +1,11 @@
+{
+  "wall_seconds": 38.5,
+  "workers": 2,
+  "R_ok": 2,
+  "R_failed": 0,
+  "replicate_seconds": [
+    38.11,
+    37.64
+  ],
+  "mean_cell_seconds": 2.576923076923077
+}
