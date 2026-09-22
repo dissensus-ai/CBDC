@@ -1,0 +1,69 @@
+{
+  "seed_base": 700504,
+  "R": 2,
+  "seed_offset": 10000003,
+  "dev_seeds": true,
+  "addendum_lock": null,
+  "cells": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.05,
+      0.0
+    ],
+    [
+      0.0,
+      0.05
+    ],
+    [
+      0.05,
+      0.05
+    ],
+    [
+      0.1,
+      0.0
+    ],
+    [
+      0.0,
+      0.1
+    ],
+    [
+      0.1,
+      0.1
+    ],
+    [
+      0.2,
+      0.0
+    ],
+    [
+      0.0,
+      0.2
+    ],
+    [
+      0.2,
+      0.2
+    ],
+    [
+      0.3,
+      0.0
+    ],
+    [
+      0.0,
+      0.3
+    ],
+    [
+      0.3,
+      0.3
+    ]
+  ],
+  "n_train": 2000,
+  "n_test": 2000,
+  "k_star": 500,
+  "split_mode": "bipartition",
+  "merge_mode": "counterparty",
+  "attr_rule": "majority",
+  "coverage_min_frac": 0.0,
+  "workers": 2
+}
