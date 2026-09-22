@@ -427,9 +427,12 @@ def _git(*args):
 
 
 def _git_head():
-    """(HEAD commit, whether detection/ has uncommitted changes). A dirty
-    tree means `commit` does not fully identify the code that ran."""
-    status = _git("status", "--porcelain", "--", os.path.dirname(HERE))
+    """(HEAD commit, whether TRACKED files under detection/ have uncommitted
+    changes). A dirty tree means `commit` does not fully identify the code
+    that ran. Untracked files are ignored: run outputs written under
+    detection/ would otherwise mark every later run dirty."""
+    status = _git("status", "--porcelain", "--untracked-files=no", "--",
+                  os.path.dirname(HERE))
     return _git("rev-parse", "HEAD"), (None if status is None
                                        else bool(status))
 

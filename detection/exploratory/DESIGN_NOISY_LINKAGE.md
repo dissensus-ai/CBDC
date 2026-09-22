@@ -332,8 +332,9 @@ reserved for the concurrent two-stage arm.
   grid_name, eps, grid` (list of `[split_mode, eps_split, eps_merge]`),
   `split_mode, merge_mode, attr_rules, models, scoring_rules, coverage_min_frac,
   alpha, dev_seeds, addendum_lock, requirements_sha256` (of
-  `detection/requirements.txt`), `commit`, `commit_dirty` (true if `detection/` had
-  uncommitted changes, in which case `commit` does not identify the code). The key names follow the E9–E11 lock
+  `detection/requirements.txt`), `commit`, `commit_dirty` (true if tracked files under
+  `detection/` had uncommitted changes, in which case `commit` does not identify
+  the code; untracked files, such as run outputs, are ignored). The key names follow the E9–E11 lock
   schema on `exp/two-stage-signal` (`addendum_lock.py`: `arm, seed_base, R, grid,
   models`), so that lock can be adopted after the branches merge; note that `grid`
   here is a list of cells, not a list of floats, and the lock's exact-match must
