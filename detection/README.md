@@ -40,6 +40,7 @@ zero marginal value (1.00 → 1.00)" was arithmetically forced. Here:
 | `data_loaders.py` | the standard data interface + documented AMLworld / Elliptic adapter stubs |
 | `run_all.py` | driver; regenerates every number in `results/` |
 | `test_pipeline.py` | regression tests: the audit hard-fails on a reconstruction of the original num_wallets artifact, and passes (num_wallets AUC ≈ 0.5) on the shipped DGP |
+| `exploratory/` | EXPLORATORY two-stage screening and identity-signal-scale arms (Sep 2026); DEV seeds only until a protocol addendum exists; see `exploratory/DESIGN_TWO_STAGE_AND_SIGNAL.md` |
 
 **Tiers** (design pack §3): T1 structure-only on unlinked pseudonyms →
 T2 + pseudonymous linkage → T3 + selected KYC/contextual attributes →
