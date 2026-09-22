@@ -10,6 +10,32 @@ Environment: Python 3.14.7, numpy 2.3.5, scipy 1.16.3, scikit-learn 1.8.0,
 pandas 2.3.3. Each summary's `provenance` records the commit and whether the
 tree was clean.
 
+## Round 3: pre-freeze fixes (22 Sep 2026, commit 8edcb48, clean tree)
+
+These runs cover four fixes:
+
+- E9 now leads with an absolute table, and its recovery summary is gated on
+  the reference gain.
+- The E10 bootstrap is censoring-aware, and its crossings carry parameter
+  values.
+- Locks use the full run spec.
+- The drivers default to n_train = 8000 and n_test = 10,000.
+
+| directory | command (run from `detection/exploratory/`) | purpose |
+|---|---|---|
+| `r3_e9/` | `run_two_stage.py --seed-base 700461 --R 3 --n-train 2000 --n-test 2000 --train-variants full shortlist --workers 3 --out-dir _dev_smoke/r3_e9` | E9 summary layout check |
+| `r3_e10/` | `run_signal_scale.py --seed-base 700471 --R 3 --n-train 2000 --n-test 2000 --workers 5 --out-dir _dev_smoke/r3_e10` | E10 summary layout check |
+
+What these runs checked (all pipeline properties):
+
+- All 3 E9 replicates and all 27 E10 units returned OK.
+- E9's first key is `primary_absolute_missed_vs_identity_lookups`.
+- E10's first two keys are the T2→T4 and T2→T3 crossing tables.
+- Both runs record `run_spec`.
+
+`test_drivers.py` also runs both drivers at toy size on 700030–700031 and
+700040–700041.
+
 ## Round 2: E9/E10 redesign (22 Sep 2026)
 
 These runs used the piecewise λ path, the paired identity stream and three

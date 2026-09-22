@@ -1,0 +1,3517 @@
+{
+  "gain_threshold_crossing_T2_minus_T4": {
+    "contrast": "identity attributes + watchlist (T2 -> T4)",
+    "primary": "crossing_mean",
+    "by_model": {
+      "gboost": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 1.25,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "crossing_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              -1.6666666666666667,
+              -1.6666666666666667,
+              -3.3333333333333335,
+              -5.0,
+              0.0,
+              5.0,
+              5.0,
+              3.3333333333333335
+            ],
+            "sd": [
+              0.0,
+              2.8867513459481287,
+              2.8867513459481287,
+              5.773502691896257,
+              5.0,
+              5.0,
+              5.0,
+              5.0,
+              2.886751345948129
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              0.0,
+              -6.533309300592527,
+              -6.533309300592527,
+              -13.066618601185054,
+              -13.429272304240413,
+              -8.429272304240413,
+              -3.4292723042404134,
+              -3.4292723042404134,
+              -1.5333093005925273
+            ],
+            "ci_hi": [
+              0.0,
+              3.199975967259193,
+              3.199975967259193,
+              6.399951934518386,
+              3.4292723042404134,
+              8.429272304240413,
+              13.429272304240413,
+              13.429272304240413,
+              8.199975967259194
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 1.25,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.48000000000000004,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.6000000000000001,
+            "sar_lambda_legit": 0.08750000000000001,
+            "kyc_low_prob_launderer": 0.5125,
+            "kyc_low_prob_legit": 0.27499999999999997,
+            "juris_beta_launderer": [
+              2.675,
+              3.75
+            ],
+            "juris_beta_legit": [
+              1.95,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": null,
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 1.1666666666666667,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.1666666666666667,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.45333333333333337,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.5333333333333334,
+                  "sar_lambda_legit": 0.09166666666666666,
+                  "kyc_low_prob_launderer": 0.4916666666666667,
+                  "kyc_low_prob_legit": 0.2833333333333333,
+                  "juris_beta_launderer": [
+                    2.5833333333333335,
+                    3.833333333333333
+                  ],
+                  "juris_beta_legit": [
+                    1.9666666666666668,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.4166666666666667,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.4166666666666667,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5333333333333333,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.7333333333333334,
+                  "sar_lambda_legit": 0.07916666666666666,
+                  "kyc_low_prob_launderer": 0.5541666666666667,
+                  "kyc_low_prob_legit": 0.2583333333333333,
+                  "juris_beta_launderer": [
+                    2.8583333333333334,
+                    3.583333333333333
+                  ],
+                  "juris_beta_legit": [
+                    1.9166666666666665,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0275,
+              "p_left_censored": 0.0,
+              "n_not_reached": 55,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 1945,
+                "lo": 1.1666666666666667,
+                "hi": 1.4166666666666667
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 1.25,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.25,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.48000000000000004,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.6000000000000001,
+                  "sar_lambda_legit": 0.08750000000000001,
+                  "kyc_low_prob_launderer": 0.5125,
+                  "kyc_low_prob_legit": 0.27499999999999997,
+                  "juris_beta_launderer": [
+                    2.675,
+                    3.75
+                  ],
+                  "juris_beta_legit": [
+                    1.95,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": null,
+                "censored": "right",
+                "label": ">lambda_max (not reached within tested range)",
+                "params": null
+              },
+              "p_no_crossing_in_range": 0.7075,
+              "p_left_censored": 0.0,
+              "n_not_reached": 1415,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 585,
+                "lo": 1.1666666666666667,
+                "hi": 1.4099987983629596
+              }
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 1.3,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "crossing_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              -1.6666666666666667,
+              -1.6666666666666667,
+              -3.3333333333333335,
+              -5.0,
+              0.0,
+              5.0,
+              5.0,
+              3.3333333333333335
+            ],
+            "sd": [
+              0.0,
+              2.8867513459481287,
+              2.8867513459481287,
+              5.773502691896257,
+              5.0,
+              5.0,
+              5.0,
+              5.0,
+              2.886751345948129
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              0.0,
+              -6.533309300592527,
+              -6.533309300592527,
+              -13.066618601185054,
+              -13.429272304240413,
+              -8.429272304240413,
+              -3.4292723042404134,
+              -3.4292723042404134,
+              -1.5333093005925273
+            ],
+            "ci_hi": [
+              0.0,
+              3.199975967259193,
+              3.199975967259193,
+              6.399951934518386,
+              3.4292723042404134,
+              8.429272304240413,
+              13.429272304240413,
+              13.429272304240413,
+              8.199975967259194
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 1.3,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.496,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.64,
+            "sar_lambda_legit": 0.08499999999999999,
+            "kyc_low_prob_launderer": 0.525,
+            "kyc_low_prob_legit": 0.27,
+            "juris_beta_launderer": [
+              2.7300000000000004,
+              3.7
+            ],
+            "juris_beta_legit": [
+              1.94,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.299999999999999,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": null,
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 1.1916666666666667,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.1916666666666667,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.4613333333333334,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.5533333333333333,
+                  "sar_lambda_legit": 0.09041666666666667,
+                  "kyc_low_prob_launderer": 0.4979166666666667,
+                  "kyc_low_prob_legit": 0.2808333333333333,
+                  "juris_beta_launderer": [
+                    2.6108333333333333,
+                    3.8083333333333336
+                  ],
+                  "juris_beta_legit": [
+                    1.9616666666666667,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.4666666666666668,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.4666666666666668,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5493333333333333,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.7733333333333334,
+                  "sar_lambda_legit": 0.07666666666666666,
+                  "kyc_low_prob_launderer": 0.5666666666666667,
+                  "kyc_low_prob_legit": 0.2533333333333333,
+                  "juris_beta_launderer": [
+                    2.913333333333333,
+                    3.533333333333333
+                  ],
+                  "juris_beta_legit": [
+                    1.9066666666666667,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0275,
+              "p_left_censored": 0.0,
+              "n_not_reached": 55,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 1945,
+                "lo": 1.1916666666666667,
+                "hi": 1.4666666666666668
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 1.3,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.3,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.496,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.64,
+                  "sar_lambda_legit": 0.08499999999999999,
+                  "kyc_low_prob_launderer": 0.525,
+                  "kyc_low_prob_legit": 0.27,
+                  "juris_beta_launderer": [
+                    2.7300000000000004,
+                    3.7
+                  ],
+                  "juris_beta_legit": [
+                    1.94,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.299999999999999,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": null,
+                "censored": "right",
+                "label": ">lambda_max (not reached within tested range)",
+                "params": null
+              },
+              "p_no_crossing_in_range": 0.7075,
+              "p_left_censored": 0.0,
+              "n_not_reached": 1415,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 585,
+                "lo": 1.1833333333333333,
+                "hi": 1.4599987983629596
+              }
+            }
+          }
+        }
+      ],
+      "logit": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.16666666666666669,
+          "flag_mean": null,
+          "recrossed_mean": true,
+          "crossing_LB": 0.9719389090962965,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -6.666666666666667,
+              3.3333333333333335,
+              3.3333333333333335,
+              -1.6666666666666667,
+              8.333333333333334,
+              30.0,
+              48.333333333333336,
+              53.333333333333336,
+              55.0
+            ],
+            "sd": [
+              5.773502691896258,
+              7.637626158259733,
+              5.773502691896257,
+              15.275252316519468,
+              2.8867513459481287,
+              13.228756555322953,
+              20.81665999466133,
+              22.54624876411447,
+              18.027756377319946
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -16.399951934518388,
+              -9.542592795858845,
+              -6.399951934518386,
+              -27.418518925051025,
+              3.466690699407474,
+              7.69824174973548,
+              13.239474221375701,
+              15.323639278960378,
+              24.60782649221269
+            ],
+            "ci_hi": [
+              3.0666186011850547,
+              16.209259462525512,
+              13.066618601185054,
+              24.08518559171769,
+              13.199975967259194,
+              52.30175825026452,
+              83.42719244529097,
+              91.34302738770629,
+              85.3921735077873
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.16666666666666669,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.08333333333333334,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.15000000000000002,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.32499999999999996,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.0666666666666664,
+              4.833333333333333
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.2333333333333325,
+            "acct_age_mu_legit": 6.299999999999999,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 0.9719389090962965,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.38933678545659267,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.39158167272888894,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.4457908363644445,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.388775563638519,
+              4.028061090903703
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.911224436361481,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 0.08333333333333334,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.08333333333333334,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.05166666666666667,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.125,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.3125,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.033333333333333,
+                    4.916666666666666
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.266666666666667,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 0.8888888888888888,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.8888888888888888,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.3577777777777778,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.3666666666666667,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.4333333333333333,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.3555555555555556,
+                    4.111111111111111
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.944444444444445,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.08333333333333334,
+                "hi": 0.8888888888888888
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 0.125,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.125,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.0675,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.1375,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.31875000000000003,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.05,
+                    4.875
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.25,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 0.9773486634618003,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.9773486634618003,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.3913924921154841,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.3932045990385401,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.44660229951927005,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.39093946538472,
+                    4.0226513365382
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.90906053461528,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.125,
+                "hi": 0.9773486634618003
+              }
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.19166666666666668,
+          "flag_mean": null,
+          "recrossed_mean": true,
+          "crossing_LB": 0.9800333984340674,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -6.666666666666667,
+              3.3333333333333335,
+              3.3333333333333335,
+              -1.6666666666666667,
+              8.333333333333334,
+              30.0,
+              48.333333333333336,
+              53.333333333333336,
+              55.0
+            ],
+            "sd": [
+              5.773502691896258,
+              7.637626158259733,
+              5.773502691896257,
+              15.275252316519468,
+              2.8867513459481287,
+              13.228756555322953,
+              20.81665999466133,
+              22.54624876411447,
+              18.027756377319946
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -16.399951934518388,
+              -9.542592795858845,
+              -6.399951934518386,
+              -27.418518925051025,
+              3.466690699407474,
+              7.69824174973548,
+              13.239474221375701,
+              15.323639278960378,
+              24.60782649221269
+            ],
+            "ci_hi": [
+              3.0666186011850547,
+              16.209259462525512,
+              13.066618601185054,
+              24.08518559171769,
+              13.199975967259194,
+              52.30175825026452,
+              83.42719244529097,
+              91.34302738770629,
+              85.3921735077873
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.19166666666666668,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.09283333333333334,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.15750000000000003,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.32875,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.0766666666666667,
+              4.808333333333334
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.223333333333334,
+            "acct_age_mu_legit": 6.300000000000001,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 0.9800333984340674,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.39241269140494567,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.3940100195302203,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.44700500976511015,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.392013359373627,
+              4.019966601565932
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9079866406263735,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 0.10833333333333335,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.10833333333333335,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.061166666666666675,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.1325,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.31625,
+                  "kyc_low_prob_legit": 0.29999999999999993,
+                  "juris_beta_launderer": [
+                    2.043333333333333,
+                    4.891666666666667
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.256666666666667,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.6999999999999998
+                }
+              },
+              "hi": {
+                "value": 0.9055555555555556,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.9055555555555556,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.3641111111111111,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.37166666666666665,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.43583333333333335,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.362222222222222,
+                    4.094444444444444
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.937777777777778,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.10833333333333335,
+                "hi": 0.9055555555555556
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 0.1375,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.1375,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.07225000000000001,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.14125000000000001,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.320625,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.055,
+                    4.8625
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.245,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 0.9899325713020248,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.9899325713020248,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.39617437709476944,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.39697977139060747,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.44848988569530374,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.39597302852081,
+                    4.010067428697975
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.90402697147919,
+                  "acct_age_mu_legit": 6.300000000000001,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.1375,
+                "hi": 0.9899325713020248
+              }
+            }
+          }
+        }
+      ],
+      "additive": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.16666666666666669,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "crossing_LB": 1.3595664201992874,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -3.3333333333333335,
+              1.6666666666666667,
+              1.6666666666666667,
+              1.6666666666666667,
+              5.0,
+              10.0,
+              21.666666666666668,
+              18.333333333333332,
+              26.666666666666668
+            ],
+            "sd": [
+              5.773502691896257,
+              2.8867513459481287,
+              2.8867513459481287,
+              7.637626158259734,
+              5.0,
+              10.0,
+              7.637626158259733,
+              5.773502691896257,
+              10.408329997330664
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -13.066618601185054,
+              -3.199975967259193,
+              -3.199975967259193,
+              -11.209259462525512,
+              -3.4292723042404134,
+              -6.858544608480827,
+              8.79074053747449,
+              8.600048065481612,
+              9.11973711068785
+            ],
+            "ci_hi": [
+              6.399951934518386,
+              6.533309300592527,
+              6.533309300592527,
+              14.542592795858845,
+              13.429272304240413,
+              26.858544608480827,
+              34.542592795858845,
+              28.066618601185052,
+              44.213596222645485
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.16666666666666669,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.08333333333333334,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.15000000000000002,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.32499999999999996,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.0666666666666664,
+              4.833333333333333
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.2333333333333325,
+            "acct_age_mu_legit": 6.299999999999999,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 1.3595664201992874,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.5150612544637719,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.6876531361594299,
+            "sar_lambda_legit": 0.08202167899003562,
+            "kyc_low_prob_launderer": 0.5398916050498219,
+            "kyc_low_prob_legit": 0.2640433579800713,
+            "juris_beta_launderer": [
+              2.795523062219216,
+              3.6404335798007126
+            ],
+            "juris_beta_legit": [
+              1.9280867159601427,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": null,
+                "censored": "left",
+                "label": "<=lambda_min (already above tau at lowest tested lambda)",
+                "params": null
+              },
+              "hi": {
+                "value": 0.9166666666666667,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.9166666666666667,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.36833333333333335,
+                  "watchlist_fpr": 0.020000000000000004,
+                  "sar_lambda_launderer": 0.375,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.4375,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.3666666666666667,
+                    4.083333333333333
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.933333333333334,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.0,
+                "hi": 0.9166666666666667
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 0.75,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.75,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.30500000000000005,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.32500000000000007,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.41250000000000003,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.3,
+                    4.25
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.000000000000001,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.3595664201992874,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.3595664201992874,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5150612544637719,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.6876531361594299,
+                  "sar_lambda_legit": 0.08202167899003562,
+                  "kyc_low_prob_launderer": 0.5398916050498219,
+                  "kyc_low_prob_legit": 0.2640433579800713,
+                  "juris_beta_launderer": [
+                    2.795523062219216,
+                    3.6404335798007126
+                  ],
+                  "juris_beta_legit": [
+                    1.9280867159601427,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.75,
+                "hi": 1.3595664201992874
+              }
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.2166666666666667,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "crossing_LB": 1.3755415908009052,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -3.3333333333333335,
+              1.6666666666666667,
+              1.6666666666666667,
+              1.6666666666666667,
+              5.0,
+              10.0,
+              21.666666666666668,
+              18.333333333333332,
+              26.666666666666668
+            ],
+            "sd": [
+              5.773502691896257,
+              2.8867513459481287,
+              2.8867513459481287,
+              7.637626158259734,
+              5.0,
+              10.0,
+              7.637626158259733,
+              5.773502691896257,
+              10.408329997330664
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -13.066618601185054,
+              -3.199975967259193,
+              -3.199975967259193,
+              -11.209259462525512,
+              -3.4292723042404134,
+              -6.858544608480827,
+              8.79074053747449,
+              8.600048065481612,
+              9.11973711068785
+            ],
+            "ci_hi": [
+              6.399951934518386,
+              6.533309300592527,
+              6.533309300592527,
+              14.542592795858845,
+              13.429272304240413,
+              26.858544608480827,
+              34.542592795858845,
+              28.066618601185052,
+              44.213596222645485
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.2166666666666667,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.10233333333333335,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.16500000000000004,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.3325,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.086666666666667,
+              4.783333333333333
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.213333333333333,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 1.3755415908009052,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.5201733090562897,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.7004332726407242,
+            "sar_lambda_legit": 0.08122292045995474,
+            "kyc_low_prob_launderer": 0.5438853977002263,
+            "kyc_low_prob_legit": 0.26244584091990947,
+            "juris_beta_launderer": [
+              2.8130957498809956,
+              3.624458409199095
+            ],
+            "juris_beta_legit": [
+              1.924891681839819,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 0.075,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.075,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.0485,
+                  "watchlist_fpr": 0.020000000000000004,
+                  "sar_lambda_launderer": 0.12250000000000001,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.31125,
+                  "kyc_low_prob_legit": 0.30000000000000004,
+                  "juris_beta_launderer": [
+                    2.0300000000000002,
+                    4.925
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.27,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 0.9666666666666667,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.9666666666666667,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.38733333333333336,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.39000000000000007,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.445,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.3866666666666667,
+                    4.033333333333333
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.913333333333334,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.075,
+                "hi": 0.9666666666666667
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 0.8,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.8,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.32400000000000007,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.3400000000000001,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.42000000000000004,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.32,
+                    4.2
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.98,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.3755415908009052,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.3755415908009052,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5201733090562897,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.7004332726407242,
+                  "sar_lambda_legit": 0.08122292045995474,
+                  "kyc_low_prob_launderer": 0.5438853977002263,
+                  "kyc_low_prob_legit": 0.26244584091990947,
+                  "juris_beta_launderer": [
+                    2.8130957498809956,
+                    3.624458409199095
+                  ],
+                  "juris_beta_legit": [
+                    1.924891681839819,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.8,
+                "hi": 1.3755415908009052
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "gain_threshold_crossing_T2_minus_T3": {
+    "contrast": "identity attributes only, no watchlist (T2 -> T3)",
+    "primary": "crossing_mean",
+    "by_model": {
+      "gboost": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 1.4,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "crossing_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              -1.6666666666666667,
+              0.0,
+              -1.6666666666666667,
+              -1.6666666666666667,
+              -5.0,
+              3.3333333333333335,
+              1.6666666666666667,
+              3.3333333333333335
+            ],
+            "sd": [
+              0.0,
+              2.8867513459481287,
+              0.0,
+              2.8867513459481287,
+              2.8867513459481287,
+              5.0,
+              2.886751345948129,
+              7.637626158259734,
+              2.886751345948129
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              0.0,
+              -6.533309300592527,
+              0.0,
+              -6.533309300592527,
+              -6.533309300592527,
+              -13.429272304240413,
+              -1.5333093005925273,
+              -11.209259462525512,
+              -1.5333093005925273
+            ],
+            "ci_hi": [
+              0.0,
+              3.199975967259193,
+              0.0,
+              3.199975967259193,
+              3.199975967259193,
+              3.4292723042404134,
+              8.199975967259194,
+              14.542592795858845,
+              8.199975967259194
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 1.4,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.528,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.72,
+            "sar_lambda_legit": 0.08000000000000002,
+            "kyc_low_prob_launderer": 0.55,
+            "kyc_low_prob_legit": 0.26,
+            "juris_beta_launderer": [
+              2.84,
+              3.6
+            ],
+            "juris_beta_legit": [
+              1.92,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": null,
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 1.3333333333333333,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.3333333333333333,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5066666666666666,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.6666666666666666,
+                  "sar_lambda_legit": 0.08333333333333334,
+                  "kyc_low_prob_launderer": 0.5333333333333333,
+                  "kyc_low_prob_legit": 0.26666666666666666,
+                  "juris_beta_launderer": [
+                    2.7666666666666666,
+                    3.666666666666667
+                  ],
+                  "juris_beta_legit": [
+                    1.9333333333333333,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.45,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.45,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.544,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.76,
+                  "sar_lambda_legit": 0.07750000000000001,
+                  "kyc_low_prob_launderer": 0.5625,
+                  "kyc_low_prob_legit": 0.255,
+                  "juris_beta_launderer": [
+                    2.8949999999999996,
+                    3.55
+                  ],
+                  "juris_beta_legit": [
+                    1.9100000000000001,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0275,
+              "p_left_censored": 0.0,
+              "n_not_reached": 55,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 1945,
+                "lo": 1.3333333333333333,
+                "hi": 1.45
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 1.4166666666666667,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.4166666666666667,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5333333333333333,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.7333333333333334,
+                  "sar_lambda_legit": 0.07916666666666666,
+                  "kyc_low_prob_launderer": 0.5541666666666667,
+                  "kyc_low_prob_legit": 0.2583333333333333,
+                  "juris_beta_launderer": [
+                    2.8583333333333334,
+                    3.583333333333333
+                  ],
+                  "juris_beta_legit": [
+                    1.9166666666666665,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": null,
+                "censored": "right",
+                "label": ">lambda_max (not reached within tested range)",
+                "params": null
+              },
+              "p_no_crossing_in_range": 0.7075,
+              "p_left_censored": 0.0,
+              "n_not_reached": 1415,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 585,
+                "lo": 1.25,
+                "hi": 1.4415886538518932
+              }
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 1.43,
+          "flag_mean": null,
+          "recrossed_mean": false,
+          "crossing_LB": NaN,
+          "flag_LB": "not_reached",
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              0.0,
+              -1.6666666666666667,
+              0.0,
+              -1.6666666666666667,
+              -1.6666666666666667,
+              -5.0,
+              3.3333333333333335,
+              1.6666666666666667,
+              3.3333333333333335
+            ],
+            "sd": [
+              0.0,
+              2.8867513459481287,
+              0.0,
+              2.8867513459481287,
+              2.8867513459481287,
+              5.0,
+              2.886751345948129,
+              7.637626158259734,
+              2.886751345948129
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              0.0,
+              -6.533309300592527,
+              0.0,
+              -6.533309300592527,
+              -6.533309300592527,
+              -13.429272304240413,
+              -1.5333093005925273,
+              -11.209259462525512,
+              -1.5333093005925273
+            ],
+            "ci_hi": [
+              0.0,
+              3.199975967259193,
+              0.0,
+              3.199975967259193,
+              3.199975967259193,
+              3.4292723042404134,
+              8.199975967259194,
+              14.542592795858845,
+              8.199975967259194
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 1.43,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.5376,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.744,
+            "sar_lambda_legit": 0.07850000000000001,
+            "kyc_low_prob_launderer": 0.5575,
+            "kyc_low_prob_legit": 0.257,
+            "juris_beta_launderer": [
+              2.873,
+              3.5700000000000003
+            ],
+            "juris_beta_legit": [
+              1.9140000000000001,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": null,
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 1.38,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.38,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5216,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.704,
+                  "sar_lambda_legit": 0.08100000000000002,
+                  "kyc_low_prob_launderer": 0.5449999999999999,
+                  "kyc_low_prob_legit": 0.262,
+                  "juris_beta_launderer": [
+                    2.8179999999999996,
+                    3.62
+                  ],
+                  "juris_beta_legit": [
+                    1.924,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.48,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.48,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5536,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.784,
+                  "sar_lambda_legit": 0.07600000000000001,
+                  "kyc_low_prob_launderer": 0.57,
+                  "kyc_low_prob_legit": 0.252,
+                  "juris_beta_launderer": [
+                    2.928,
+                    3.52
+                  ],
+                  "juris_beta_legit": [
+                    1.904,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0275,
+              "p_left_censored": 0.0,
+              "n_not_reached": 55,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 1945,
+                "lo": 1.38,
+                "hi": 1.48
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 1.4333333333333333,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.4333333333333333,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.5386666666666666,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.7466666666666667,
+                  "sar_lambda_legit": 0.07833333333333334,
+                  "kyc_low_prob_launderer": 0.5583333333333333,
+                  "kyc_low_prob_legit": 0.25666666666666665,
+                  "juris_beta_launderer": [
+                    2.8766666666666665,
+                    3.5666666666666664
+                  ],
+                  "juris_beta_legit": [
+                    1.9133333333333333,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": null,
+                "censored": "right",
+                "label": ">lambda_max (not reached within tested range)",
+                "params": null
+              },
+              "p_no_crossing_in_range": 0.7075,
+              "p_left_censored": 0.0,
+              "n_not_reached": 1415,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 585,
+                "lo": 1.3,
+                "hi": 1.4532709230815146
+              }
+            }
+          }
+        }
+      ],
+      "logit": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.16666666666666669,
+          "flag_mean": null,
+          "recrossed_mean": true,
+          "crossing_LB": 1.2087122553133791,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -3.3333333333333335,
+              1.6666666666666667,
+              0.0,
+              0.0,
+              1.6666666666666667,
+              20.0,
+              43.333333333333336,
+              43.333333333333336,
+              40.0
+            ],
+            "sd": [
+              2.886751345948129,
+              10.408329997330663,
+              0.0,
+              5.0,
+              10.408329997330663,
+              10.0,
+              16.072751268321593,
+              16.072751268321593,
+              10.0
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -8.199975967259194,
+              -15.880262889312148,
+              0.0,
+              -8.429272304240413,
+              -15.880262889312148,
+              3.141455391519173,
+              16.237013909531697,
+              16.237013909531697,
+              23.141455391519173
+            ],
+            "ci_hi": [
+              1.5333093005925273,
+              19.21359622264548,
+              0.0,
+              8.429272304240413,
+              19.21359622264548,
+              36.85854460848083,
+              70.42965275713497,
+              70.42965275713497,
+              56.85854460848083
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.16666666666666669,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.08333333333333334,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.15000000000000002,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.32499999999999996,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.0666666666666664,
+              4.833333333333333
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.2333333333333325,
+            "acct_age_mu_legit": 6.299999999999999,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 1.2087122553133791,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.4667879217002813,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.5669698042507033,
+            "sar_lambda_legit": 0.08956438723433105,
+            "kyc_low_prob_launderer": 0.5021780638283448,
+            "kyc_low_prob_legit": 0.2791287744686621,
+            "juris_beta_launderer": [
+              2.629583480844717,
+              3.791287744686621
+            ],
+            "juris_beta_legit": [
+              1.9582575489373242,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 0.049999999999999996,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.049999999999999996,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.039,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.115,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.3075,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.02,
+                    4.95
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.279999999999999,
+                  "acct_age_mu_legit": 6.299999999999999,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.0,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.0,
+                  "segment": "anchor s=mid",
+                  "watchlist_tpr": 0.4,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.4,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.45,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.4,
+                    4.0
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.049999999999999996,
+                "hi": 1.0
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 0.08333333333333333,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.08333333333333333,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.051666666666666666,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.125,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.31249999999999994,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.033333333333333,
+                    4.916666666666666
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.266666666666666,
+                  "acct_age_mu_legit": 6.299999999999999,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.2087122553133791,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.2087122553133791,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.4667879217002813,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.5669698042507033,
+                  "sar_lambda_legit": 0.08956438723433105,
+                  "kyc_low_prob_launderer": 0.5021780638283448,
+                  "kyc_low_prob_legit": 0.2791287744686621,
+                  "juris_beta_launderer": [
+                    2.629583480844717,
+                    3.791287744686621
+                  ],
+                  "juris_beta_legit": [
+                    1.9582575489373242,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.08333333333333333,
+                "hi": 1.2087122553133791
+              }
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.2166666666666667,
+          "flag_mean": null,
+          "recrossed_mean": true,
+          "crossing_LB": 1.2218551268620514,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -3.3333333333333335,
+              1.6666666666666667,
+              0.0,
+              0.0,
+              1.6666666666666667,
+              20.0,
+              43.333333333333336,
+              43.333333333333336,
+              40.0
+            ],
+            "sd": [
+              2.886751345948129,
+              10.408329997330663,
+              0.0,
+              5.0,
+              10.408329997330663,
+              10.0,
+              16.072751268321593,
+              16.072751268321593,
+              10.0
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -8.199975967259194,
+              -15.880262889312148,
+              0.0,
+              -8.429272304240413,
+              -15.880262889312148,
+              3.141455391519173,
+              16.237013909531697,
+              16.237013909531697,
+              23.141455391519173
+            ],
+            "ci_hi": [
+              1.5333093005925273,
+              19.21359622264548,
+              0.0,
+              8.429272304240413,
+              19.21359622264548,
+              36.85854460848083,
+              70.42965275713497,
+              70.42965275713497,
+              56.85854460848083
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.2166666666666667,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.10233333333333335,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.16500000000000004,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.3325,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.086666666666667,
+              4.783333333333333
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.213333333333333,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 1.2218551268620514,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.47099364059585647,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.5774841014896412,
+            "sar_lambda_legit": 0.08890724365689744,
+            "kyc_low_prob_launderer": 0.5054637817155129,
+            "kyc_low_prob_legit": 0.2778144873137948,
+            "juris_beta_launderer": [
+              2.6440406395482565,
+              3.778144873137949
+            ],
+            "juris_beta_legit": [
+              1.9556289746275897,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 0.08,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.08,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.0504,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.12400000000000001,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.31200000000000006,
+                  "kyc_low_prob_legit": 0.30000000000000004,
+                  "juris_beta_launderer": [
+                    2.032,
+                    4.920000000000001
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.000000000000001
+                  ],
+                  "acct_age_mu_launderer": 6.268000000000001,
+                  "acct_age_mu_legit": 6.300000000000001,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.0107142857142857,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.0107142857142857,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.4034285714285714,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.40857142857142853,
+                  "sar_lambda_legit": 0.09946428571428571,
+                  "kyc_low_prob_launderer": 0.45267857142857143,
+                  "kyc_low_prob_legit": 0.2989285714285714,
+                  "juris_beta_launderer": [
+                    2.411785714285714,
+                    3.9892857142857143
+                  ],
+                  "juris_beta_legit": [
+                    1.9978571428571428,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.08,
+                "hi": 1.0107142857142857
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 0.1,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.1,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.05800000000000001,
+                  "watchlist_fpr": 0.020000000000000004,
+                  "sar_lambda_launderer": 0.13,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.315,
+                  "kyc_low_prob_legit": 0.30000000000000004,
+                  "juris_beta_launderer": [
+                    2.04,
+                    4.9
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.26,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.2218551268620514,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.2218551268620514,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.47099364059585647,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.5774841014896412,
+                  "sar_lambda_legit": 0.08890724365689744,
+                  "kyc_low_prob_launderer": 0.5054637817155129,
+                  "kyc_low_prob_legit": 0.2778144873137948,
+                  "juris_beta_launderer": [
+                    2.6440406395482565,
+                    3.778144873137949
+                  ],
+                  "juris_beta_legit": [
+                    1.9556289746275897,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.1,
+                "hi": 1.2218551268620514
+              }
+            }
+          }
+        }
+      ],
+      "additive": [
+        {
+          "tau": 0.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.16666666666666669,
+          "flag_mean": null,
+          "recrossed_mean": true,
+          "crossing_LB": 1.5831471643423611,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -3.3333333333333335,
+              1.6666666666666667,
+              -3.3333333333333335,
+              -1.6666666666666667,
+              0.0,
+              8.333333333333334,
+              11.666666666666666,
+              16.666666666666668,
+              20.0
+            ],
+            "sd": [
+              5.773502691896257,
+              2.8867513459481287,
+              2.886751345948129,
+              2.8867513459481287,
+              5.0,
+              7.637626158259733,
+              10.408329997330663,
+              2.886751345948129,
+              8.660254037844387
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -13.066618601185054,
+              -3.199975967259193,
+              -8.199975967259194,
+              -6.533309300592527,
+              -8.429272304240413,
+              -4.542592795858845,
+              -5.880262889312148,
+              11.800024032740808,
+              5.400072098222418
+            ],
+            "ci_hi": [
+              6.399951934518386,
+              6.533309300592527,
+              1.5333093005925273,
+              3.199975967259193,
+              8.429272304240413,
+              21.209259462525512,
+              29.213596222645478,
+              21.533309300592528,
+              34.59992790177758
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.16666666666666669,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.08333333333333334,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.15000000000000002,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.32499999999999996,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.0666666666666664,
+              4.833333333333333
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.2333333333333325,
+            "acct_age_mu_legit": 6.299999999999999,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 1.5831471643423611,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.5866070925895556,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.8665177314738889,
+            "sar_lambda_legit": 0.07084264178288195,
+            "kyc_low_prob_launderer": 0.5957867910855903,
+            "kyc_low_prob_legit": 0.2416852835657639,
+            "juris_beta_launderer": [
+              3.0414618807765974,
+              3.4168528356576386
+            ],
+            "juris_beta_legit": [
+              1.8833705671315277,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": null,
+                "censored": "left",
+                "label": "<=lambda_min (already above tau at lowest tested lambda)",
+                "params": null
+              },
+              "hi": {
+                "value": 1.125,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.125,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.44000000000000006,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.5,
+                  "sar_lambda_legit": 0.09375000000000001,
+                  "kyc_low_prob_launderer": 0.48124999999999996,
+                  "kyc_low_prob_legit": 0.28750000000000003,
+                  "juris_beta_launderer": [
+                    2.5375,
+                    3.875
+                  ],
+                  "juris_beta_legit": [
+                    1.975,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.0,
+                "hi": 1.125
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 1.0,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.0,
+                  "segment": "anchor s=mid",
+                  "watchlist_tpr": 0.4,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.4,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.45,
+                  "kyc_low_prob_legit": 0.3,
+                  "juris_beta_launderer": [
+                    2.4,
+                    4.0
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.6300807051157238,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.6300807051157238,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.6016258256370316,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.9040645640925791,
+                  "sar_lambda_legit": 0.06849596474421382,
+                  "kyc_low_prob_launderer": 0.607520176278931,
+                  "kyc_low_prob_legit": 0.23699192948842762,
+                  "juris_beta_launderer": [
+                    3.0930887756272964,
+                    3.3699192948842764
+                  ],
+                  "juris_beta_legit": [
+                    1.8739838589768554,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 1.0,
+                "hi": 1.6300807051157238
+              }
+            }
+          }
+        },
+        {
+          "tau": 1.0,
+          "alpha": 0.1,
+          "primary": "crossing_mean",
+          "secondary": "crossing_LB",
+          "crossing_mean": 0.2166666666666667,
+          "flag_mean": null,
+          "recrossed_mean": true,
+          "crossing_LB": 1.5972872063621641,
+          "flag_LB": null,
+          "recrossed_LB": false,
+          "curve": {
+            "mean": [
+              -3.3333333333333335,
+              1.6666666666666667,
+              -3.3333333333333335,
+              -1.6666666666666667,
+              0.0,
+              8.333333333333334,
+              11.666666666666666,
+              16.666666666666668,
+              20.0
+            ],
+            "sd": [
+              5.773502691896257,
+              2.8867513459481287,
+              2.886751345948129,
+              2.8867513459481287,
+              5.0,
+              7.637626158259733,
+              10.408329997330663,
+              2.886751345948129,
+              8.660254037844387
+            ],
+            "n": [
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3,
+              3
+            ],
+            "ci_lo": [
+              -13.066618601185054,
+              -3.199975967259193,
+              -8.199975967259194,
+              -6.533309300592527,
+              -8.429272304240413,
+              -4.542592795858845,
+              -5.880262889312148,
+              11.800024032740808,
+              5.400072098222418
+            ],
+            "ci_hi": [
+              6.399951934518386,
+              6.533309300592527,
+              1.5333093005925273,
+              3.199975967259193,
+              8.429272304240413,
+              21.209259462525512,
+              29.213596222645478,
+              21.533309300592528,
+              34.59992790177758
+            ]
+          },
+          "params_at_crossing_mean": {
+            "lambda": 0.2166666666666667,
+            "segment": "segment s=low->s=mid",
+            "watchlist_tpr": 0.10233333333333335,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.16500000000000004,
+            "sar_lambda_legit": 0.1,
+            "kyc_low_prob_launderer": 0.3325,
+            "kyc_low_prob_legit": 0.3,
+            "juris_beta_launderer": [
+              2.086666666666667,
+              4.783333333333333
+            ],
+            "juris_beta_legit": [
+              2.0,
+              5.0
+            ],
+            "acct_age_mu_launderer": 6.213333333333333,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "params_at_crossing_LB": {
+            "lambda": 1.5972872063621641,
+            "segment": "segment s=mid->s=high",
+            "watchlist_tpr": 0.5911319060358925,
+            "watchlist_fpr": 0.02,
+            "sar_lambda_launderer": 0.8778297650897313,
+            "sar_lambda_legit": 0.07013563968189179,
+            "kyc_low_prob_launderer": 0.599321801590541,
+            "kyc_low_prob_legit": 0.2402712793637836,
+            "juris_beta_launderer": [
+              3.0570159269983805,
+              3.4027127936378356
+            ],
+            "juris_beta_legit": [
+              1.8805425587275673,
+              5.0
+            ],
+            "acct_age_mu_launderer": 5.9,
+            "acct_age_mu_legit": 6.3,
+            "acct_age_sigma": 0.7
+          },
+          "bootstrap": {
+            "B": 2000,
+            "seed": 700471,
+            "level": 0.9,
+            "method": "censoring-aware percentile over all draws",
+            "mean": {
+              "lo": {
+                "value": 0.075,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 0.075,
+                  "segment": "segment s=low->s=mid",
+                  "watchlist_tpr": 0.0485,
+                  "watchlist_fpr": 0.020000000000000004,
+                  "sar_lambda_launderer": 0.12250000000000001,
+                  "sar_lambda_legit": 0.1,
+                  "kyc_low_prob_launderer": 0.31125,
+                  "kyc_low_prob_legit": 0.30000000000000004,
+                  "juris_beta_launderer": [
+                    2.0300000000000002,
+                    4.925
+                  ],
+                  "juris_beta_legit": [
+                    2.0,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 6.27,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.1625,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.1625,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.452,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.53,
+                  "sar_lambda_legit": 0.091875,
+                  "kyc_low_prob_launderer": 0.49062500000000003,
+                  "kyc_low_prob_legit": 0.28375,
+                  "juris_beta_launderer": [
+                    2.5787500000000003,
+                    3.8375
+                  ],
+                  "juris_beta_legit": [
+                    1.9675,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 0.075,
+                "hi": 1.1625
+              }
+            },
+            "LB": {
+              "lo": {
+                "value": 1.025,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.025,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.40800000000000003,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.42,
+                  "sar_lambda_legit": 0.09875000000000002,
+                  "kyc_low_prob_launderer": 0.45625,
+                  "kyc_low_prob_legit": 0.29750000000000004,
+                  "juris_beta_launderer": [
+                    2.4275,
+                    3.975
+                  ],
+                  "juris_beta_legit": [
+                    1.995,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "hi": {
+                "value": 1.6402433365266043,
+                "censored": null,
+                "label": null,
+                "params": {
+                  "lambda": 1.6402433365266043,
+                  "segment": "segment s=mid->s=high",
+                  "watchlist_tpr": 0.6048778676885134,
+                  "watchlist_fpr": 0.02,
+                  "sar_lambda_launderer": 0.9121946692212834,
+                  "sar_lambda_legit": 0.0679878331736698,
+                  "kyc_low_prob_launderer": 0.610060834131651,
+                  "kyc_low_prob_legit": 0.23597566634733957,
+                  "juris_beta_launderer": [
+                    3.104267670179265,
+                    3.3597566634733957
+                  ],
+                  "juris_beta_legit": [
+                    1.8719513326946793,
+                    5.0
+                  ],
+                  "acct_age_mu_launderer": 5.9,
+                  "acct_age_mu_legit": 6.3,
+                  "acct_age_sigma": 0.7
+                }
+              },
+              "p_no_crossing_in_range": 0.0,
+              "p_left_censored": 0.0,
+              "n_not_reached": 0,
+              "n_left_censored": 0,
+              "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within the tested range -- NOT the band",
+                "n": 2000,
+                "lo": 1.025,
+                "hi": 1.6402433365266043
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "per_lambda_delta": {
+    "gboost|T2_minus_T4": [
+      {
+        "lam": 0.0,
+        "mean": 0.0,
+        "sd": 0.0,
+        "R_ok": 3,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0,
+        "half_width": 0.0,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.25,
+        "mean": -1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -6.533309300592527,
+        "ci_hi": 3.199975967259193,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.5,
+        "mean": -1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -6.533309300592527,
+        "ci_hi": 3.199975967259193,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.75,
+        "mean": -3.3333333333333335,
+        "sd": 5.773502691896257,
+        "R_ok": 3,
+        "ci_lo": -13.066618601185054,
+        "ci_hi": 6.399951934518386,
+        "half_width": 9.73328526785172,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.0,
+        "mean": -5.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -13.429272304240413,
+        "ci_hi": 3.4292723042404134,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.25,
+        "mean": 0.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -8.429272304240413,
+        "ci_hi": 8.429272304240413,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.5,
+        "mean": 5.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -3.4292723042404134,
+        "ci_hi": 13.429272304240413,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.75,
+        "mean": 5.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -3.4292723042404134,
+        "ci_hi": 13.429272304240413,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 2.0,
+        "mean": 3.3333333333333335,
+        "sd": 2.886751345948129,
+        "R_ok": 3,
+        "ci_lo": -1.5333093005925273,
+        "ci_hi": 8.199975967259194,
+        "half_width": 4.866642633925861,
+        "alpha": 0.1
+      }
+    ],
+    "gboost|T2_minus_T3": [
+      {
+        "lam": 0.0,
+        "mean": 0.0,
+        "sd": 0.0,
+        "R_ok": 3,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0,
+        "half_width": 0.0,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.25,
+        "mean": -1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -6.533309300592527,
+        "ci_hi": 3.199975967259193,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.5,
+        "mean": 0.0,
+        "sd": 0.0,
+        "R_ok": 3,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0,
+        "half_width": 0.0,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.75,
+        "mean": -1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -6.533309300592527,
+        "ci_hi": 3.199975967259193,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.0,
+        "mean": -1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -6.533309300592527,
+        "ci_hi": 3.199975967259193,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.25,
+        "mean": -5.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -13.429272304240413,
+        "ci_hi": 3.4292723042404134,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.5,
+        "mean": 3.3333333333333335,
+        "sd": 2.886751345948129,
+        "R_ok": 3,
+        "ci_lo": -1.5333093005925273,
+        "ci_hi": 8.199975967259194,
+        "half_width": 4.866642633925861,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.75,
+        "mean": 1.6666666666666667,
+        "sd": 7.637626158259734,
+        "R_ok": 3,
+        "ci_lo": -11.209259462525512,
+        "ci_hi": 14.542592795858845,
+        "half_width": 12.875926129192178,
+        "alpha": 0.1
+      },
+      {
+        "lam": 2.0,
+        "mean": 3.3333333333333335,
+        "sd": 2.886751345948129,
+        "R_ok": 3,
+        "ci_lo": -1.5333093005925273,
+        "ci_hi": 8.199975967259194,
+        "half_width": 4.866642633925861,
+        "alpha": 0.1
+      }
+    ],
+    "logit|T2_minus_T4": [
+      {
+        "lam": 0.0,
+        "mean": -6.666666666666667,
+        "sd": 5.773502691896258,
+        "R_ok": 3,
+        "ci_lo": -16.399951934518388,
+        "ci_hi": 3.0666186011850547,
+        "half_width": 9.733285267851722,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.25,
+        "mean": 3.3333333333333335,
+        "sd": 7.637626158259733,
+        "R_ok": 3,
+        "ci_lo": -9.542592795858845,
+        "ci_hi": 16.209259462525512,
+        "half_width": 12.875926129192178,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.5,
+        "mean": 3.3333333333333335,
+        "sd": 5.773502691896257,
+        "R_ok": 3,
+        "ci_lo": -6.399951934518386,
+        "ci_hi": 13.066618601185054,
+        "half_width": 9.73328526785172,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.75,
+        "mean": -1.6666666666666667,
+        "sd": 15.275252316519468,
+        "R_ok": 3,
+        "ci_lo": -27.418518925051025,
+        "ci_hi": 24.08518559171769,
+        "half_width": 25.751852258384357,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.0,
+        "mean": 8.333333333333334,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": 3.466690699407474,
+        "ci_hi": 13.199975967259194,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.25,
+        "mean": 30.0,
+        "sd": 13.228756555322953,
+        "R_ok": 3,
+        "ci_lo": 7.69824174973548,
+        "ci_hi": 52.30175825026452,
+        "half_width": 22.30175825026452,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.5,
+        "mean": 48.333333333333336,
+        "sd": 20.81665999466133,
+        "R_ok": 3,
+        "ci_lo": 13.239474221375701,
+        "ci_hi": 83.42719244529097,
+        "half_width": 35.093859111957634,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.75,
+        "mean": 53.333333333333336,
+        "sd": 22.54624876411447,
+        "R_ok": 3,
+        "ci_lo": 15.323639278960378,
+        "ci_hi": 91.34302738770629,
+        "half_width": 38.00969405437296,
+        "alpha": 0.1
+      },
+      {
+        "lam": 2.0,
+        "mean": 55.0,
+        "sd": 18.027756377319946,
+        "R_ok": 3,
+        "ci_lo": 24.60782649221269,
+        "ci_hi": 85.3921735077873,
+        "half_width": 30.39217350778731,
+        "alpha": 0.1
+      }
+    ],
+    "logit|T2_minus_T3": [
+      {
+        "lam": 0.0,
+        "mean": -3.3333333333333335,
+        "sd": 2.886751345948129,
+        "R_ok": 3,
+        "ci_lo": -8.199975967259194,
+        "ci_hi": 1.5333093005925273,
+        "half_width": 4.866642633925861,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.25,
+        "mean": 1.6666666666666667,
+        "sd": 10.408329997330663,
+        "R_ok": 3,
+        "ci_lo": -15.880262889312148,
+        "ci_hi": 19.21359622264548,
+        "half_width": 17.546929555978814,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.5,
+        "mean": 0.0,
+        "sd": 0.0,
+        "R_ok": 3,
+        "ci_lo": 0.0,
+        "ci_hi": 0.0,
+        "half_width": 0.0,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.75,
+        "mean": 0.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -8.429272304240413,
+        "ci_hi": 8.429272304240413,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.0,
+        "mean": 1.6666666666666667,
+        "sd": 10.408329997330663,
+        "R_ok": 3,
+        "ci_lo": -15.880262889312148,
+        "ci_hi": 19.21359622264548,
+        "half_width": 17.546929555978814,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.25,
+        "mean": 20.0,
+        "sd": 10.0,
+        "R_ok": 3,
+        "ci_lo": 3.141455391519173,
+        "ci_hi": 36.85854460848083,
+        "half_width": 16.858544608480827,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.5,
+        "mean": 43.333333333333336,
+        "sd": 16.072751268321593,
+        "R_ok": 3,
+        "ci_lo": 16.237013909531697,
+        "ci_hi": 70.42965275713497,
+        "half_width": 27.09631942380164,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.75,
+        "mean": 43.333333333333336,
+        "sd": 16.072751268321593,
+        "R_ok": 3,
+        "ci_lo": 16.237013909531697,
+        "ci_hi": 70.42965275713497,
+        "half_width": 27.09631942380164,
+        "alpha": 0.1
+      },
+      {
+        "lam": 2.0,
+        "mean": 40.0,
+        "sd": 10.0,
+        "R_ok": 3,
+        "ci_lo": 23.141455391519173,
+        "ci_hi": 56.85854460848083,
+        "half_width": 16.858544608480827,
+        "alpha": 0.1
+      }
+    ],
+    "additive|T2_minus_T4": [
+      {
+        "lam": 0.0,
+        "mean": -3.3333333333333335,
+        "sd": 5.773502691896257,
+        "R_ok": 3,
+        "ci_lo": -13.066618601185054,
+        "ci_hi": 6.399951934518386,
+        "half_width": 9.73328526785172,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.25,
+        "mean": 1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -3.199975967259193,
+        "ci_hi": 6.533309300592527,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.5,
+        "mean": 1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -3.199975967259193,
+        "ci_hi": 6.533309300592527,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.75,
+        "mean": 1.6666666666666667,
+        "sd": 7.637626158259734,
+        "R_ok": 3,
+        "ci_lo": -11.209259462525512,
+        "ci_hi": 14.542592795858845,
+        "half_width": 12.875926129192178,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.0,
+        "mean": 5.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -3.4292723042404134,
+        "ci_hi": 13.429272304240413,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.25,
+        "mean": 10.0,
+        "sd": 10.0,
+        "R_ok": 3,
+        "ci_lo": -6.858544608480827,
+        "ci_hi": 26.858544608480827,
+        "half_width": 16.858544608480827,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.5,
+        "mean": 21.666666666666668,
+        "sd": 7.637626158259733,
+        "R_ok": 3,
+        "ci_lo": 8.79074053747449,
+        "ci_hi": 34.542592795858845,
+        "half_width": 12.875926129192178,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.75,
+        "mean": 18.333333333333332,
+        "sd": 5.773502691896257,
+        "R_ok": 3,
+        "ci_lo": 8.600048065481612,
+        "ci_hi": 28.066618601185052,
+        "half_width": 9.73328526785172,
+        "alpha": 0.1
+      },
+      {
+        "lam": 2.0,
+        "mean": 26.666666666666668,
+        "sd": 10.408329997330664,
+        "R_ok": 3,
+        "ci_lo": 9.11973711068785,
+        "ci_hi": 44.213596222645485,
+        "half_width": 17.546929555978817,
+        "alpha": 0.1
+      }
+    ],
+    "additive|T2_minus_T3": [
+      {
+        "lam": 0.0,
+        "mean": -3.3333333333333335,
+        "sd": 5.773502691896257,
+        "R_ok": 3,
+        "ci_lo": -13.066618601185054,
+        "ci_hi": 6.399951934518386,
+        "half_width": 9.73328526785172,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.25,
+        "mean": 1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -3.199975967259193,
+        "ci_hi": 6.533309300592527,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.5,
+        "mean": -3.3333333333333335,
+        "sd": 2.886751345948129,
+        "R_ok": 3,
+        "ci_lo": -8.199975967259194,
+        "ci_hi": 1.5333093005925273,
+        "half_width": 4.866642633925861,
+        "alpha": 0.1
+      },
+      {
+        "lam": 0.75,
+        "mean": -1.6666666666666667,
+        "sd": 2.8867513459481287,
+        "R_ok": 3,
+        "ci_lo": -6.533309300592527,
+        "ci_hi": 3.199975967259193,
+        "half_width": 4.86664263392586,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.0,
+        "mean": 0.0,
+        "sd": 5.0,
+        "R_ok": 3,
+        "ci_lo": -8.429272304240413,
+        "ci_hi": 8.429272304240413,
+        "half_width": 8.429272304240413,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.25,
+        "mean": 8.333333333333334,
+        "sd": 7.637626158259733,
+        "R_ok": 3,
+        "ci_lo": -4.542592795858845,
+        "ci_hi": 21.209259462525512,
+        "half_width": 12.875926129192178,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.5,
+        "mean": 11.666666666666666,
+        "sd": 10.408329997330663,
+        "R_ok": 3,
+        "ci_lo": -5.880262889312148,
+        "ci_hi": 29.213596222645478,
+        "half_width": 17.546929555978814,
+        "alpha": 0.1
+      },
+      {
+        "lam": 1.75,
+        "mean": 16.666666666666668,
+        "sd": 2.886751345948129,
+        "R_ok": 3,
+        "ci_lo": 11.800024032740808,
+        "ci_hi": 21.533309300592528,
+        "half_width": 4.866642633925861,
+        "alpha": 0.1
+      },
+      {
+        "lam": 2.0,
+        "mean": 20.0,
+        "sd": 8.660254037844387,
+        "R_ok": 3,
+        "ci_lo": 5.400072098222418,
+        "ci_hi": 34.59992790177758,
+        "half_width": 14.599927901777582,
+        "alpha": 0.1
+      }
+    ]
+  },
+  "arm": "E10",
+  "status": "EXPLORATORY",
+  "halted": null,
+  "primary_estimand": "crossing_mean",
+  "secondary_estimand": "crossing_LB",
+  "path": "piecewise: [0,1] s=low->mid, [1,2] s=mid->high; kink at 1",
+  "identity_rng_stream": true,
+  "models": [
+    "gboost",
+    "logit",
+    "additive"
+  ],
+  "R": 3,
+  "seed_mode": "DEV",
+  "seed_base": 700471,
+  "test_seed_offset": 10000003,
+  "addendum_lock": null,
+  "run_spec": {
+    "arm": "E10",
+    "seed_base": 700471,
+    "R": 3,
+    "grid": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0
+    ],
+    "models": [
+      "gboost",
+      "logit",
+      "additive"
+    ],
+    "n_train": 2000,
+    "n_test": 2000,
+    "k_star": 500,
+    "test_seed_offset": 10000003,
+    "identity_rng_stream": true,
+    "flags": {
+      "path": "piecewise low->mid->high",
+      "b": "mid",
+      "prevalence": 0.05,
+      "thresholds": [
+        0.0,
+        1.0
+      ],
+      "alpha": 0.1,
+      "bootstrap_B": 2000,
+      "bootstrap_seed": 700471
+    },
+    "environment": {
+      "python": "3.14.7",
+      "numpy": "2.3.5",
+      "scipy": "1.16.3",
+      "sklearn": "1.8.0",
+      "pandas": "2.3.3",
+      "requirements_sha256": "076bbb2aa785640cb6a6ac2e091653655b05a04d007996af085851038c632520"
+    }
+  },
+  "args": {
+    "seed_base": 700471,
+    "R": 3,
+    "addendum_lock": null,
+    "n_train": 2000,
+    "n_test": 2000,
+    "k_star": 500,
+    "lambda_grid": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0,
+      1.25,
+      1.5,
+      1.75,
+      2.0
+    ],
+    "models": [
+      "gboost",
+      "logit",
+      "additive"
+    ],
+    "b": "mid",
+    "prevalence": 0.05,
+    "thresholds": [
+      0.0,
+      1.0
+    ],
+    "alpha": 0.1,
+    "bootstrap_B": 2000,
+    "bootstrap_seed": null,
+    "workers": 5,
+    "out_dir": "_dev_smoke/r3_e10",
+    "print_spec": false
+  },
+  "provenance": {
+    "git_commit": "8edcb489649d78257913a2bc3d5b35c359b60f15",
+    "git_dirty": false,
+    "python": "3.14.7",
+    "numpy": "2.3.5",
+    "scipy": "1.16.3",
+    "sklearn": "1.8.0",
+    "pandas": "2.3.3"
+  },
+  "lambda_grid": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+    2.0
+  ],
+  "mid_position": {
+    "anchors": {
+      "low": {
+        "lambda": 0.0,
+        "mismatched_fields": []
+      },
+      "mid": {
+        "lambda": 1.0,
+        "mismatched_fields": []
+      },
+      "high": {
+        "lambda": 2.0,
+        "mismatched_fields": []
+      }
+    },
+    "lambda_1_equals_mid": true,
+    "all_anchors_exact": true,
+    "straight_line_lambda_for_mid": {
+      "watchlist_tpr": 0.5428571428571429,
+      "watchlist_fpr": null,
+      "sar_lambda_launderer": 0.2727272727272728,
+      "sar_lambda_legit": 0.0,
+      "kyc_low_prob_launderer": 0.3750000000000001,
+      "kyc_low_prob_legit": 0.0,
+      "juris_beta_launderer[0]": 0.2666666666666666,
+      "juris_beta_launderer[1]": 0.5,
+      "juris_beta_legit[0]": 0.0,
+      "juris_beta_legit[1]": null,
+      "acct_age_mu_launderer": 1.0,
+      "acct_age_mu_legit": null,
+      "acct_age_sigma": null
+    },
+    "straight_line_collinear": false
+  },
+  "n_units": 27,
+  "n_ok": 27,
+  "failures": [],
+  "wall_seconds_total": 35.51964592933655,
+  "wall_seconds_per_unit": [
+    6.258561134338379,
+    6.242825984954834,
+    6.218130826950073,
+    6.149577856063843,
+    6.236693620681763,
+    5.829420804977417,
+    5.886584997177124,
+    5.793570041656494,
+    5.899193048477173,
+    5.862975597381592,
+    5.715933799743652,
+    5.8625030517578125,
+    5.8040993213653564,
+    5.80812668800354,
+    5.876719951629639,
+    5.806707859039307,
+    5.744360446929932,
+    5.822793483734131,
+    5.783773183822632,
+    5.707660913467407,
+    5.679523944854736,
+    5.852627515792847,
+    5.739016056060791,
+    5.857295036315918,
+    5.852398157119751,
+    5.720529794692993,
+    5.6718738079071045
+  ],
+  "failures_per_lambda": {
+    "0": 0,
+    "0.25": 0,
+    "0.5": 0,
+    "0.75": 0,
+    "1": 0,
+    "1.25": 0,
+    "1.5": 0,
+    "1.75": 0,
+    "2": 0
+  }
+}
