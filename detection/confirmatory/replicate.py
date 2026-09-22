@@ -62,8 +62,14 @@ def _numeric_ids(entities) -> np.ndarray:
     return entities.entity_id.str.slice(1).astype(int).to_numpy()
 
 
-def _world(seed: int, n_entities: int, obfuscation=None, base_rate=None):
-    cfg = default_config(seed)
+def _world(seed: int, n_entities: int, obfuscation=None, base_rate=None,
+           cfg_factory=None):
+    # cfg_factory(seed, n_entities) -> DGPConfig lets exploratory arms run a
+    # non-default world through the same replicate. None = protocol v3 world.
+    if cfg_factory is None:
+        cfg = default_config(seed)
+    else:
+        cfg = cfg_factory(seed, n_entities)
     cfg.n_entities = n_entities
     if obfuscation is not None:
         cfg.obfuscation = obfuscation
@@ -78,12 +84,19 @@ def _world(seed: int, n_entities: int, obfuscation=None, base_rate=None):
 
 def run_replicate(replicate_id, train_seed, test_seed, *, n_train, n_test,
                   k_star, obfuscation=None, base_rate=None,
-                  k_star_grid=None, audit_train=True):
+                  k_star_grid=None, audit_train=True, cfg_factory=None,
+                  score_hook=None):
     """Run one replicate. Returns the machine-readable record of protocol 14.2.
 
     `status` is OK / FAIL_AUDIT / FAIL_LABEL / FAIL_NUM. On any failure the
     record still returns, carrying the reason -- the caller counts it and moves
     on without substituting a fresh seed.
+
+    Exploratory hooks (both None in every confirmatory call, which leaves the
+    record byte-identical): `cfg_factory` swaps the generated world, and
+    `score_hook(rec, ctx)` receives the already-fitted test scores plus the
+    training data, so an arm can reuse them instead of re-fitting. A hook
+    exception is a FAIL_NUM like any other crash.
     """
     rec = {
         "replicate_id": int(replicate_id),
@@ -98,9 +111,9 @@ def run_replicate(replicate_id, train_seed, test_seed, *, n_train, n_test,
     }
     try:
         tr_data, tr_wf, tr_ef, _ = _world(train_seed, n_train, obfuscation,
-                                          base_rate)
+                                          base_rate, cfg_factory)
         te_data, te_wf, te_ef, _ = _world(test_seed, n_test, obfuscation,
-                                          base_rate)
+                                          base_rate, cfg_factory)
 
         # Gate runs on the TRAINING world only. Auditing the test world and
         # acting on it would be selection on the outcome population.
@@ -129,6 +142,7 @@ def run_replicate(replicate_id, train_seed, test_seed, *, n_train, n_test,
 
         y_tr = tr_ef.is_launderer.to_numpy()
         scores = {}
+        fitted = {}
         for model_name in (PRIMARY_MODEL, CONTRAST_MODEL):
             rec["models"][model_name] = {}
             for tier in TIERS:
@@ -137,6 +151,8 @@ def run_replicate(replicate_id, train_seed, test_seed, *, n_train, n_test,
                 m.fit(tr_ef[cols].to_numpy(dtype=float), y_tr)
                 s = m.predict_proba(te_ef[cols].to_numpy(dtype=float))[:, 1]
                 scores[(model_name, tier)] = s
+                if score_hook is not None:
+                    fitted[(model_name, tier)] = m
                 rec["models"][model_name][tier] = {
                     "TP": true_positives(y_te, s, tiebreak, k),
                     "MissedPer10k": missed_per_10k(y_te, s, tiebreak, k),
@@ -163,6 +179,15 @@ def run_replicate(replicate_id, train_seed, test_seed, *, n_train, n_test,
                     scores[(model_name, "T4")], tiebreak, k_star_grid)
                 for model_name in (PRIMARY_MODEL, CONTRAST_MODEL)
             }
+
+        if score_hook is not None:
+            score_hook(rec, {
+                "scores": scores, "fitted": fitted, "y_test": y_te,
+                "tiebreak": tiebreak, "k": k, "k_star": k_star,
+                "train_ef": tr_ef, "y_train": y_tr,
+                "train_tiebreak": _numeric_ids(tr_data["entities"]),
+                "test_ef": te_ef, "train_seed": train_seed,
+            })
         return rec
 
     except Exception as e:  # noqa: BLE001 - any crash is a counted failure
