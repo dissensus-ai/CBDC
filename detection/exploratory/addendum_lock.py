@@ -3,19 +3,24 @@
 A reported (non-DEV) exploratory run needs `--addendum-lock <path>`, a JSON
 file written after MF approves the addendum:
 
-    {"arm": "E10", "seed_base": 2026120001, "R": 52,
-     "grid": [0.0, 0.25, ...], "models": ["gboost", "logit", "additive"],
+    {"spec": {<the run spec, below>},
      "protocol_file": "detection/protocols/E9_E11_PROTOCOL_<date>.md",
      "protocol_sha256": "<sha256 of that file>",
      "freeze_commit": "<commit that added the protocol file>",
      "written": "YYYY-MM-DD", "lock_sha256": "<hash of everything else>"}
 
-`validate` refuses unless the lock is internally consistent (self-hash), the
-protocol file on disk still hashes to protocol_sha256, the freeze commit is an
-ancestor of HEAD, the run's arm/seed_base/R/grid/models equal the lock's
-exactly, the block fits the arm's 10,000-seed allowance, and neither the
-spent-seed registry nor any result file in the repository (seed_scan,
-structured pass) already records a seed in the run's train or test block.
+The run spec is built by the driver (`--print-spec` prints it) and holds
+EVERYTHING that could change a number: arm, seed_base, R, grid, models,
+n_train, n_test, k_star, test_seed_offset, identity_rng_stream, the arm's
+variant/attribute flags (E9: stage-2 tiers, training variants, stage-1
+training scores, alpha, bootstrap; E10: b, prevalence, thresholds, alpha,
+bootstrap), and the environment (Python + numpy/scipy/sklearn/pandas versions
++ sha256 of requirements.txt). `validate` requires the run's spec to equal the
+lock's EXACTLY, key by key -- no field is left for the command line to drift.
+It also requires the self-hash to hold, the protocol file on disk to still hash
+to protocol_sha256, the freeze commit to be an ancestor of HEAD, R <= 10,000,
+and neither the spent-seed registry nor any result file in the repository
+(seed_scan, structured pass) to record a seed in the run's train or test block.
 
 Like protocol_lock, this makes "pre-specified" checkable; it is not a
 registration. No lock for the reported bases exists yet -- writing one is a
@@ -39,8 +44,10 @@ from datetime import date, datetime, timezone
 HERE = os.path.dirname(os.path.abspath(__file__))
 REGISTRY = os.path.join(HERE, "SPENT_SEEDS.json")
 MAX_SEEDS_PER_ARM = 10_000
-LOCK_KEYS = ("arm", "seed_base", "R", "grid", "models", "protocol_file",
-             "protocol_sha256", "freeze_commit")
+LOCK_KEYS = ("spec", "protocol_file", "protocol_sha256", "freeze_commit")
+SPEC_KEYS = ("arm", "seed_base", "R", "grid", "models", "n_train", "n_test",
+             "k_star", "test_seed_offset", "identity_rng_stream", "flags",
+             "environment")
 ARMS = ("E9", "E10", "E11")
 
 
@@ -71,8 +78,35 @@ def compute_hash(lock: dict) -> str:
                                      separators=(",", ":")).encode()).hexdigest()
 
 
-def _norm_grid(grid):
-    return [float(x) for x in grid]
+def normalize_spec(spec: dict) -> dict:
+    """Canonical form for exact comparison: JSON round trip, grid as floats,
+    models sorted (the fitted set, not an order)."""
+    missing = [k for k in SPEC_KEYS if k not in spec]
+    if missing:
+        raise AddendumLockError(f"run spec is missing {missing}")
+    extra = [k for k in spec if k not in SPEC_KEYS]
+    if extra:
+        raise AddendumLockError(f"run spec has unknown keys {extra}")
+    d = json.loads(json.dumps(spec, sort_keys=True))
+    d["grid"] = [float(x) for x in d["grid"]]
+    d["models"] = sorted(d["models"])
+    return d
+
+
+def spec_diff(lock_spec: dict, run_spec: dict) -> dict:
+    """{dotted key: (lock value, run value)} for every mismatch, recursing into
+    the flags and environment dicts."""
+    a, b = normalize_spec(lock_spec), normalize_spec(run_spec)
+    diff = {}
+    for k in SPEC_KEYS:
+        if isinstance(a[k], dict) and isinstance(b[k], dict):
+            for kk in sorted(set(a[k]) | set(b[k])):
+                if a[k].get(kk, "<absent>") != b[k].get(kk, "<absent>"):
+                    diff[f"{k}.{kk}"] = (a[k].get(kk, "<absent>"),
+                                         b[k].get(kk, "<absent>"))
+        elif a[k] != b[k]:
+            diff[k] = (a[k], b[k])
+    return diff
 
 
 def blocks(seed_base: int, R: int, offset: int) -> list[tuple[int, int]]:
@@ -160,9 +194,8 @@ def check_block_unused(seed_base, R, offset, *, root=None,
                             for h in hits[:5]))
 
 
-def validate(path, *, arm, seed_base, R, grid, models, offset, root=None,
-             registry=REGISTRY) -> dict:
-    """Load the lock at `path` and raise unless it authorises exactly this run."""
+def validate(path, spec, *, root=None, registry=REGISTRY) -> dict:
+    """Load the lock at `path`; raise unless it authorises exactly `spec`."""
     root = root or repo_root()
     if not os.path.isfile(path):
         raise AddendumLockError(f"addendum lock {path} does not exist")
@@ -176,16 +209,12 @@ def validate(path, *, arm, seed_base, R, grid, models, offset, root=None,
         raise AddendumLockError(f"lock is missing {missing}")
     if lock["lock_sha256"] != compute_hash(lock):
         raise AddendumLockError("lock hash mismatch: edited after it was written")
-    if lock["arm"] not in ARMS:
-        raise AddendumLockError(f"unknown arm {lock['arm']!r}")
-
-    want = {"arm": arm, "seed_base": seed_base, "R": R,
-            "grid": _norm_grid(grid), "models": sorted(models)}
-    have = {"arm": lock["arm"], "seed_base": lock["seed_base"], "R": lock["R"],
-            "grid": _norm_grid(lock["grid"]), "models": sorted(lock["models"])}
-    diff = {k: (have[k], want[k]) for k in want if have[k] != want[k]}
+    if lock["spec"].get("arm") not in ARMS:
+        raise AddendumLockError(f"unknown arm {lock['spec'].get('arm')!r}")
+    diff = spec_diff(lock["spec"], spec)
     if diff:
         raise AddendumLockError(f"run does not match lock (lock, run): {diff}")
+    R = spec["R"]
     if not 1 <= R <= MAX_SEEDS_PER_ARM:
         raise AddendumLockError(f"R={R} outside 1..{MAX_SEEDS_PER_ARM}")
 
@@ -202,17 +231,20 @@ def validate(path, *, arm, seed_base, R, grid, models, offset, root=None,
         raise AddendumLockError(f"freeze commit {fc} is not an ancestor of "
                                 f"HEAD: running from code that predates or "
                                 f"forks away from the freeze")
-    check_block_unused(seed_base, R, offset, root=root, registry=registry)
+    check_block_unused(spec["seed_base"], R, spec["test_seed_offset"],
+                       root=root, registry=registry)
     return lock
 
 
-def write_lock(path, *, arm, seed_base, R, grid, models, protocol_file,
-               freeze_commit, offset, root=None, registry=REGISTRY) -> dict:
-    """Write a lock after checking the block is unused. Post-approval only."""
+def write_lock(path, spec, *, protocol_file, freeze_commit, root=None,
+               registry=REGISTRY) -> dict:
+    """Write a lock for `spec` after checking its seed blocks are unused.
+    Post-approval only. `spec` should come from the driver's --print-spec."""
     root = root or repo_root()
-    check_block_unused(seed_base, R, offset, root=root, registry=registry)
-    lock = {"arm": arm, "seed_base": int(seed_base), "R": int(R),
-            "grid": list(grid), "models": list(models),
+    spec = normalize_spec(spec)
+    check_block_unused(spec["seed_base"], spec["R"], spec["test_seed_offset"],
+                       root=root, registry=registry)
+    lock = {"spec": spec,
             "protocol_file": protocol_file,
             "protocol_sha256": file_sha256(os.path.join(root, protocol_file)),
             "freeze_commit": freeze_commit,

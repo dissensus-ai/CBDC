@@ -5,7 +5,9 @@ the reported seeds, they may run ONLY on the development block 700001-700999,
 and every seed they would touch must be disjoint from every seed already spent
 elsewhere in this repository. A seed base outside the DEV block is accepted
 only with `--addendum-lock <path>`, validated by addendum_lock.validate: the
-lock must match this run's arm, seed base, R, grid and models exactly, its
+lock's run spec must equal this run's spec exactly (arm, seeds, R, grid,
+models, n_train, n_test, k*, test-seed offset, identity stream, arm flags and
+environment), its
 protocol file and freeze commit must check out, and neither the spent-seed
 registry nor any result file in the repository may already record a seed in
 the run's train or test block. A lock naming a DEV-block base is refused: DEV
@@ -69,8 +71,8 @@ def check_seeds(seed_base: int, R: int, addendum_lock: str | None = None,
 
     Returns "DEV" or "ADDENDUM" for the output record. The whole train block
     seed_base..seed_base+R-1 must sit inside the DEV range, not just its first
-    seed, or a large R would walk out of the block unnoticed. `lock_spec` =
-    {"arm", "grid", "models"} of the run, required with a lock.
+    seed, or a large R would walk out of the block unnoticed. `lock_spec` is
+    the driver's full run spec, required with a lock.
     """
     if not isinstance(seed_base, int) or isinstance(seed_base, bool):
         raise SeedGuardError(f"seed base must be an int, got {seed_base!r}")
@@ -112,12 +114,14 @@ def check_seeds(seed_base: int, R: int, addendum_lock: str | None = None,
     if mode == "ADDENDUM":
         import addendum_lock as al
         spec = lock_spec or {}
-        if not {"arm", "grid", "models"} <= set(spec):
-            raise SeedGuardError("a locked run must state arm, grid and models")
+        if (spec.get("seed_base"), spec.get("R"),
+                spec.get("test_seed_offset")) != (seed_base, R,
+                                                  TEST_SEED_OFFSET):
+            raise SeedGuardError("a locked run must pass its full run spec, "
+                                 "consistent with --seed-base/--R and the "
+                                 "protocol test-seed offset")
         try:
-            al.validate(addendum_lock, arm=spec["arm"], seed_base=seed_base,
-                        R=R, grid=spec["grid"], models=spec["models"],
-                        offset=TEST_SEED_OFFSET, root=root,
+            al.validate(addendum_lock, spec, root=root,
                         registry=registry or al.REGISTRY)
         except al.AddendumLockError as e:
             raise SeedGuardError(f"addendum lock refused: {e}") from e

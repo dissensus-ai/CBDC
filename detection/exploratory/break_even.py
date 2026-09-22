@@ -1,36 +1,42 @@
-"""Break-even identity signal: the smallest lambda at which the identity block
-demonstrably reduces misses by more than a threshold. Pure functions, no I/O.
+"""Gain-threshold crossing: the smallest lambda at which the identity block
+reduces misses by more than a threshold tau. Pure functions, no I/O.
+
+(Called "break-even" in the first build. Renamed: nothing breaks even here --
+tau is a reference gain level, not a cost-benefit balance point. The module
+keeps its file name for now.)
 
 Input is a replicate x grid matrix D[r, j] = Delta missed-per-10k (T2 minus
 T4, or T2 minus T3; positive = identity helps) for replicate r at lambda_j,
-NaN where that replicate failed. Two estimands are computed. The addendum
-(E10, amendment A0) fixes lambda*_mean as PRIMARY and lambda*_LB as secondary.
+NaN where that replicate failed. Two estimands; the addendum (E10, A0) fixes:
 
-lambda*_mean PRIMARY. First lambda at which mean Delta exceeds tau. Estimates
-             a property of the generator; carries no "demonstrably" claim.
-             Its uncertainty is the bootstrap band.
+crossing_mean  PRIMARY. First lambda at which mean Delta exceeds tau. Estimates
+               a property of the generator; carries no "demonstrably" claim.
+               Its uncertainty is the bootstrap band.
 
-lambda*_LB   secondary. First lambda at which the lower endpoint of the
-             two-sided (1-alpha) Student-t interval for mean Delta exceeds
-             tau. This DEPENDS ON R: with more replicates the interval
-             tightens and lambda*_LB moves down toward lambda*_mean. It is a
-             detection threshold for a given design, reported, not headlined.
+crossing_LB    secondary. First lambda at which the lower endpoint of the
+               two-sided (1-alpha) Student-t interval for mean Delta exceeds
+               tau. DEPENDS ON R: more replicates tighten the interval and move
+               crossing_LB down toward crossing_mean. Reported, not headlined.
 
-Both use linear interpolation between the bracketing grid points on the
-relevant curve (lower bound or mean). Censoring is reported, never filled:
-"left_censored" if the curve is already above tau at the first grid point
-(lambda* <= lambda_0; value lambda_0), "not_reached" if it never exceeds tau
-(value NaN). "recrossed" flags a curve that drops back to <= tau after its first
-crossing, where "smallest lambda" and "the lambda beyond which" differ.
+Both interpolate linearly between the bracketing grid points. Censoring is
+reported, never filled: "left_censored" if the curve already exceeds tau at
+the first grid point (crossing <= lambda_min; value lambda_min), "not_reached"
+if it never exceeds tau within the grid (value NaN). "recrossed" flags a curve
+that drops back to <= tau after its first crossing.
 
-Uncertainty for lambda*: a replicate bootstrap that resamples replicate ROWS
-(all grid points of a replicate move together), recomputes the estimand, and
-reports percentile limits plus how many draws were censored. Row resampling
-keeps whatever dependence exists across lambda; under the current DGP same-seed
-worlds at different lambda share labels and wallet counts but not transactions
-(see identity_signal), so that dependence is weak. With a bootstrap on
-lambda*_LB the interval is re-derived inside each draw, so its band describes
-the estimator at this R, consistent with the R-dependence above.
+Uncertainty: a replicate bootstrap resampling replicate ROWS (all grid points
+of a replicate move together, preserving the lambda pairing). The interval is
+CENSORING-AWARE and computed over ALL B draws: a not-reached draw is
+right-censored at +infinity and a left-censored draw sits at lambda_min. A
+limit that falls in censored mass is reported as a bound with a label
+(">lambda_max (not reached within tested range)" / "<=lambda_min (already
+above tau at the lowest tested lambda)"), never as a number. P(no crossing in
+range) = n_not_reached / B is reported. The finite-draws-only interval is kept
+as "conditional_on_crossing" -- it answers a different question (where does it
+cross, given that it crosses in range) and must not be read as the band.
+Why: the first build used finite draws only; on a toy where 1,107/2,000 draws
+never crossed it reported a finite ~0.88-0.98 band, i.e. a conditional interval
+dressed as the unconditional one.
 """
 
 from __future__ import annotations
@@ -40,7 +46,12 @@ import math
 import numpy as np
 from scipy import stats
 
-__all__ = ["curve_stats", "first_crossing", "break_even", "bootstrap_break_even"]
+__all__ = ["curve_stats", "first_crossing", "gain_threshold_crossing",
+           "bootstrap_gain_threshold_crossing", "RIGHT_CENSORED_LABEL",
+           "LEFT_CENSORED_LABEL"]
+
+RIGHT_CENSORED_LABEL = ">lambda_max (not reached within tested range)"
+LEFT_CENSORED_LABEL = "<=lambda_min (already above tau at lowest tested lambda)"
 
 
 def curve_stats(D, alpha=0.10):
@@ -97,29 +108,40 @@ def first_crossing(grid, curve, tau):
     return float(x), None, recrossed
 
 
-def break_even(grid, D, tau, alpha=0.10):
-    """Both estimands on one replicate x grid matrix."""
+def gain_threshold_crossing(grid, D, tau, alpha=0.10):
+    """Both crossing estimands on one replicate x grid matrix."""
     cs = curve_stats(D, alpha)
-    out = {"tau": tau, "alpha": alpha, "primary": "lambda_star_mean",
-           "secondary": "lambda_star_LB"}
+    out = {"tau": tau, "alpha": alpha, "primary": "crossing_mean",
+           "secondary": "crossing_LB"}
     for name, curve in (("mean", cs["mean"]), ("LB", cs["ci_lo"])):
         v, flag, rec = first_crossing(grid, curve, tau)
-        out[f"lambda_star_{name}"] = v
+        out[f"crossing_{name}"] = v
         out[f"flag_{name}"] = flag
         out[f"recrossed_{name}"] = rec
     out["curve"] = {k: v.tolist() for k, v in cs.items()}
     return out
 
 
-def bootstrap_break_even(grid, D, tau, alpha=0.10, B=2000, seed=0,
-                         level=0.90):
-    """Replicate-row bootstrap band for both estimands.
+def _limit(v, lam_min):
+    """One bootstrap limit: a number, or a labelled censored bound."""
+    if math.isinf(v):
+        return {"value": None, "censored": "right", "label": RIGHT_CENSORED_LABEL}
+    if v == lam_min:
+        return {"value": None, "censored": "left", "label": LEFT_CENSORED_LABEL}
+    return {"value": float(v), "censored": None, "label": None}
 
-    Percentile limits are computed over draws with a finite value; the count
-    of censored draws is reported alongside, because a band that silently
-    drops half its draws is not the band it looks like. Left-censored draws
-    enter at lambda_0 (their value) and are also counted.
+
+def bootstrap_gain_threshold_crossing(grid, D, tau, alpha=0.10, B=2000, seed=0,
+                                      level=0.90):
+    """Censoring-aware replicate-row bootstrap band for both estimands.
+
+    Percentiles use method="inverted_cdf", so each limit is an actual draw and
+    never an interpolation between a finite value and +infinity. A limit equal
+    to lambda_min is labelled left-censored: a draw can only sit exactly at
+    lambda_min by being left-censored or by crossing exactly there, and both
+    mean "crossing <= lambda_min".
     """
+    grid = np.asarray(grid, dtype=float)
     D = np.asarray(D, dtype=float)
     rng = np.random.default_rng(seed)
     R = D.shape[0]
@@ -133,16 +155,29 @@ def bootstrap_break_even(grid, D, tau, alpha=0.10, B=2000, seed=0,
             v, flag, _ = first_crossing(grid, curve, tau)
             if flag:
                 flags[name][flag] += 1
-            draws[name].append(v)
+            draws[name].append(math.inf if flag == "not_reached" else v)
     q = ((1 - level) / 2, 1 - (1 - level) / 2)
-    out = {"B": B, "seed": seed, "level": level}
+    out = {"B": B, "seed": seed, "level": level,
+           "method": "censoring-aware percentile over all draws"}
     for name in ("mean", "LB"):
         x = np.asarray(draws[name], dtype=float)
-        fin = x[~np.isnan(x)]
+        fin = x[np.isfinite(x)]
+        lo, hi = (float(np.quantile(x, qq, method="inverted_cdf")) for qq in q)
         out[name] = {
-            "lo": float(np.quantile(fin, q[0])) if len(fin) else math.nan,
-            "hi": float(np.quantile(fin, q[1])) if len(fin) else math.nan,
-            "n_finite": int(len(fin)),
-            **{f"n_{k}": v for k, v in flags[name].items()},
+            "lo": _limit(lo, grid[0]),
+            "hi": _limit(hi, grid[0]),
+            "p_no_crossing_in_range": flags[name]["not_reached"] / B,
+            "p_left_censored": flags[name]["left_censored"] / B,
+            "n_not_reached": flags[name]["not_reached"],
+            "n_left_censored": flags[name]["left_censored"],
+            "conditional_on_crossing": {
+                "note": "finite draws only; conditional on a crossing within "
+                        "the tested range -- NOT the band",
+                "n": int(len(fin)),
+                "lo": (float(np.quantile(fin, q[0], method="inverted_cdf"))
+                       if len(fin) else None),
+                "hi": (float(np.quantile(fin, q[1], method="inverted_cdf"))
+                       if len(fin) else None),
+            },
         }
     return out

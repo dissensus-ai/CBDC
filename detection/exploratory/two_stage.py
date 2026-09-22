@@ -40,7 +40,6 @@ from __future__ import annotations
 import math
 import os
 import sys
-import warnings
 
 import numpy as np
 
@@ -224,59 +223,139 @@ def make_hook(kprime_grid=DEFAULT_KPRIME_GRID, stage2_tiers=STAGE2_TIERS,
     return hook
 
 
-def kprime_summary(reps, grid, qs=(0.5, 0.9), B=2000, seed=0, level=0.90):
-    """Recovered-share curve and K'_q, the addendum's E9 summary statistics.
+NOT_APPLICABLE = "not_applicable"
 
-    `reps` maps replicate id -> {K'*: (miss_T2, miss_2s, miss_hi)}; only
-    replicates carrying every grid point enter, so each K'* uses the same
-    replicate set. Share at K'* = ratio of replicate means (A0 primary):
 
-        (mean miss_T2 - mean miss_2s) / (mean miss_T2 - mean miss_hi)
+def recovery_summary(reps, grid, qs=(0.5, 0.9), B=2000, seed=0, level=0.90,
+                     alpha=0.10):
+    """Reference gain, recovered-share curve and K'_q -- a SECONDARY annotation.
 
-    NaN when the mean gap is below GAP_EPS. The band is a replicate bootstrap
-    (whole replicates resampled across all K'*), percentile at `level`.
-    K'_q = smallest grid K'* whose share >= q; K'_q_LB uses the bootstrap
-    lower limit instead ("reaches q demonstrably" -- R-dependent, like
-    lambda*_LB). None when no grid point reaches q.
+    The E9 primary output is absolute (missed per 10k vs test-time identity
+    lookups per 10k, built by the driver). A "recovered share" only means
+    something when single-stage identity access actually reduces misses, so
+    everything here is gated on the reference gain G = miss_T2 - miss_hi:
+
+      mean G <= 0          every share and K'_q = "not_applicable",
+                           reason "nonpositive_reference_gain" (full identity
+                           does not help, or makes misses worse: there is no
+                           gain to recover, and the ratio would read nonsense)
+      t-interval of G      flag "reference_gain_not_separated"; the ratio and
+      includes 0           its bootstrap band are kept but role is
+                           "secondary_annotation"
+
+    `reps`: replicate id -> {K'*: (miss_T2, miss_2s, miss_hi)}; only
+    replicates carrying every grid point enter. Share at K'* = ratio of
+    replicate means (A0 primary estimator):
+
+        (mean miss_T2 - mean miss_2s) / mean G
+
+    Bootstrap: whole replicates resampled across all K'*. A draw whose
+    resampled mean G <= 0 is NOT APPLICABLE; such draws are counted
+    (n_not_applicable), never dropped silently. Two bands are reported:
+      band_all_draws     percentile over ALL B draws with not-applicable draws
+                         entering at -infinity ("no recoverable gain"); a limit
+                         in that mass is reported as None + label. K'_q_LB uses
+                         this lower limit.
+      band_conditional   applicable draws only, labelled
+                         conditional_on_positive_reference_gain.
+    K'_q = smallest grid K'* whose share >= q (point curve); K'_q_LB the same
+    on the all-draws lower limit (R-dependent). None = no grid point reaches q.
     """
+    from inference import mean_ci
+
     grid = [int(g) for g in grid]
     ids = sorted(r for r, d in reps.items() if all(g in d for g in grid))
+    out = {"n_replicates": len(ids), "role": "secondary_annotation",
+           "estimator": "ratio_of_replicate_means"}
     if not ids:
-        return {"n_replicates": 0, "curve": [], "K_q": {}}
+        out.update(status=NOT_APPLICABLE, reason="no_complete_replicates")
+        return out
     arr = np.array([[reps[r][g] for g in grid] for r in ids], dtype=float)
+    gain = arr[:, 0, 0] - arr[:, 0, 2]       # identical at every K'*
+    ref = mean_ci(gain.tolist(), alpha)
+    out["reference_gain"] = ref
+    na_all = {"curve": NOT_APPLICABLE, "mean_of_ratios": NOT_APPLICABLE,
+              "K_q": {f"{q:g}": {"mean": NOT_APPLICABLE, "LB": NOT_APPLICABLE}
+                      for q in qs}}
+    if not ref["mean"] > GAP_EPS:
+        out.update(status=NOT_APPLICABLE, reason="nonpositive_reference_gain",
+                   **na_all)
+        return out
+    flags = []
+    if ref.get("ci_lo") is None or ref["ci_lo"] <= 0:
+        flags.append("reference_gain_not_separated")
+    out.update(status="computed", flags=flags)
 
     def share(a):
         m = a.mean(axis=0)                       # (G, 3)
-        den = m[:, 0] - m[:, 2]
-        with np.errstate(invalid="ignore", divide="ignore"):
-            out = (m[:, 0] - m[:, 1]) / den
-        out[np.abs(den) < GAP_EPS] = np.nan
-        return out
+        den = m[0, 0] - m[0, 2]
+        if not den > GAP_EPS:
+            return None                          # not applicable in this draw
+        return (m[:, 0] - m[:, 1]) / den
 
     point = share(arr)
     rng = np.random.default_rng(seed)
-    boot = np.array([share(arr[rng.integers(0, len(ids), len(ids))])
-                     for _ in range(B)])
+    draws, n_na = [], 0
+    for _ in range(B):
+        sh = share(arr[rng.integers(0, len(ids), len(ids))])
+        if sh is None:
+            n_na += 1
+            sh = np.full(len(grid), -np.inf)
+        draws.append(sh)
+    draws = np.array(draws).reshape(B, len(grid))
     a = (1 - level) / 2
-    with warnings.catch_warnings():
-        # an all-NaN column is a zero-gap K'*: NaN band, reported as such
-        warnings.simplefilter("ignore", RuntimeWarning)
-        lo = np.nanquantile(boot, a, axis=0) if B else np.full(len(grid), np.nan)
-        hi = (np.nanquantile(boot, 1 - a, axis=0) if B
-              else np.full(len(grid), np.nan))
+
+    def q_all(qq):
+        return np.quantile(draws, qq, axis=0, method="inverted_cdf")
+
+    appl = draws[np.isfinite(draws[:, 0])] if B else draws
+    lo_all, hi_all = (q_all(a), q_all(1 - a)) if B else (None, None)
+    lo_c = (np.quantile(appl, a, axis=0, method="inverted_cdf")
+            if len(appl) else None)
+    hi_c = (np.quantile(appl, 1 - a, axis=0, method="inverted_cdf")
+            if len(appl) else None)
+
+    def lim(v):
+        if v is None:
+            return None
+        return None if np.isinf(v) else float(v)
 
     def first(vals, q):
         for g, v in zip(grid, vals):
-            if not np.isnan(v) and v >= q:
+            if np.isfinite(v) and v >= q:
                 return g
         return None
 
-    return {
-        "n_replicates": len(ids),
-        "bootstrap": {"B": B, "seed": seed, "level": level},
-        "curve": [{"kprime_star": g, "share": float(p), "boot_lo": float(l),
-                   "boot_hi": float(h)}
-                  for g, p, l, h in zip(grid, point, lo, hi)],
-        "K_q": {f"{q:g}": {"mean": first(point, q), "LB": first(lo, q)}
+    per_rep = [(g_r, (arr[i, :, 0] - arr[i, :, 1]) / g_r)
+               for i, g_r in enumerate(gain) if g_r > GAP_EPS]
+    mor = [mean_ci([r[1][j] for r in per_rep], alpha)
+           for j in range(len(grid))]
+    out.update({
+        "bootstrap": {"B": B, "seed": seed, "level": level,
+                      "n_not_applicable": n_na,
+                      "p_not_applicable": n_na / B if B else None,
+                      "not_applicable_label": "resampled mean reference gain "
+                                              "<= 0 (no recoverable gain)"},
+        "curve": [{
+            "kprime_star": g, "share": float(point[j]),
+            "band_all_draws": {
+                "lo": lim(lo_all[j]) if B else None,
+                "hi": lim(hi_all[j]) if B else None,
+                "lo_label": ("in not-applicable mass"
+                             if B and np.isinf(lo_all[j]) else None)},
+            "band_conditional_on_positive_reference_gain": {
+                "lo": lim(lo_c[j]) if lo_c is not None else None,
+                "hi": lim(hi_c[j]) if hi_c is not None else None,
+                "n": int(len(appl))},
+        } for j, g in enumerate(grid)],
+        "mean_of_ratios": {
+            "role": "secondary to ratio_of_means",
+            "n_replicates_used": len(per_rep),
+            "n_excluded_nonpositive_replicate_gain": len(ids) - len(per_rep),
+            "per_kprime": [dict(kprime_star=g, **mor[j])
+                           for j, g in enumerate(grid)]},
+        "K_q": {f"{q:g}": {"mean": first(point, q),
+                           "LB": first(lo_all, q) if B else None}
                 for q in qs},
-    }
+    })
+    return out

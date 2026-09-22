@@ -1,7 +1,8 @@
-"""Shared bits for the exploratory drivers: worker cap and run provenance."""
+"""Shared bits for the exploratory drivers: worker cap, provenance, environment."""
 
 from __future__ import annotations
 
+import hashlib
 import os
 import platform
 import subprocess
@@ -32,4 +33,24 @@ def provenance() -> dict:
         "python": platform.python_version(),
         "numpy": numpy.__version__, "scipy": scipy.__version__,
         "sklearn": sklearn.__version__, "pandas": pandas.__version__,
+    }
+
+
+def environment() -> dict:
+    """Interpreter + library versions and the sha256 of detection/
+    requirements.txt. Part of the locked run spec: a reported run must execute
+    in exactly the environment its lock names."""
+    import numpy
+    import pandas
+    import scipy
+    import sklearn
+    req = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "requirements.txt")
+    with open(req, "rb") as f:
+        req_sha = hashlib.sha256(f.read()).hexdigest()
+    return {
+        "python": platform.python_version(),
+        "numpy": numpy.__version__, "scipy": scipy.__version__,
+        "sklearn": sklearn.__version__, "pandas": pandas.__version__,
+        "requirements_sha256": req_sha,
     }

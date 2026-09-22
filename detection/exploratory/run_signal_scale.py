@@ -14,9 +14,12 @@ paired counterfactuals.
     python3 run_signal_scale.py --seed-base 700401 --R 3 --n-train 2000 \
         --n-test 2000 --out-dir _dev_smoke/e10_paired
 
-Writes <out-dir>/signal_scale_replicates.jsonl and signal_scale_summary.json
-(per-lambda t-intervals and break-even estimates per model x contrast x
-threshold; lambda*_mean primary). Stop rule (addendum A0): the run halts if
+Writes <out-dir>/signal_scale_replicates.jsonl and signal_scale_summary.json.
+The summary leads with two top-level gain-threshold crossing tables of equal
+standing -- T2->T4 (attributes + watchlist) and T2->T3 (attributes only) --
+per model x threshold, crossing_mean primary, each reported crossing carrying
+the identity-parameter values at that lambda so a threshold has a substantive
+meaning; then per-lambda Delta intervals. Stop rule (addendum A0): the run halts if
 more than 10% of the R units at any single lambda fail. Refuses to overwrite
 an existing summary.
 """
@@ -44,8 +47,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(HERE), "confirmatory"))
 
 import addendum_lock  # noqa: E402
 import seed_guard  # noqa: E402
-from _driver_common import MAX_WORKERS, provenance  # noqa: E402
-from break_even import bootstrap_break_even, break_even  # noqa: E402
+from _driver_common import MAX_WORKERS, environment, provenance  # noqa: E402
+from break_even import (bootstrap_gain_threshold_crossing,  # noqa: E402
+                        gain_threshold_crossing)
 from identity_signal import (DEFAULT_LAMBDA_GRID, cfg_factory,  # noqa: E402
                              lambda_block, mid_position)
 from extra_models import ADDITIVE_MODEL, make_additive_hook  # noqa: E402
@@ -55,6 +59,10 @@ from replicate import CONTRAST_MODEL, PRIMARY_MODEL, run_replicate  # noqa: E402
 ARM = "E10"
 MODELS = (PRIMARY_MODEL, CONTRAST_MODEL, ADDITIVE_MODEL)
 CONTRASTS = ("T2_minus_T4", "T2_minus_T3")
+CONTRAST_LABELS = {
+    "T2_minus_T4": "identity attributes + watchlist (T2 -> T4)",
+    "T2_minus_T3": "identity attributes only, no watchlist (T2 -> T3)",
+}
 STOP_FAIL_RATE = 0.10
 
 
@@ -80,23 +88,71 @@ def delta_matrix(records, grid, R, model, contrast):
     return D
 
 
+def params_at(lam):
+    """Identity-parameter values at lambda (tuples as lists), with the path
+    segment, so a crossing reads as a parameter setting, not just a number."""
+    if lam is None or (isinstance(lam, float) and np.isnan(lam)):
+        return None
+    lam = float(lam)
+    seg = ("anchor s=low" if lam == 0 else "anchor s=mid" if lam == 1
+           else "anchor s=high" if lam == 2
+           else "segment s=low->s=mid" if lam < 1 else "segment s=mid->s=high")
+    return {"lambda": lam, "segment": seg,
+            **{k: (list(v) if isinstance(v, tuple) else v)
+               for k, v in lambda_block(lam).items()}}
+
+
+def crossing_entry(grid, D, tau, alpha, B, boot_seed):
+    est = gain_threshold_crossing(grid, D, tau, alpha)
+    for name in ("mean", "LB"):
+        v, flag = est[f"crossing_{name}"], est[f"flag_{name}"]
+        est[f"params_at_crossing_{name}"] = (
+            None if flag == "not_reached" else params_at(v))
+    boot = bootstrap_gain_threshold_crossing(grid, D, tau, alpha, B=B,
+                                             seed=boot_seed)
+    for name in ("mean", "LB"):
+        for side in ("lo", "hi"):
+            lim = boot[name][side]
+            lim["params"] = (params_at(lim["value"])
+                             if lim["value"] is not None else None)
+    est["bootstrap"] = boot
+    return est
+
+
 def summarize(records, grid, R, thresholds, alpha, B, boot_seed, models):
-    out = {}
+    """Crossing tables (one per contrast, both top-level) and per-lambda Delta."""
+    crossings = {c: {"contrast": CONTRAST_LABELS[c], "primary": "crossing_mean",
+                     "by_model": {}} for c in CONTRASTS}
+    per_lambda = {}
     for model in models:
         for contrast in CONTRASTS:
             D = delta_matrix(records, grid, R, model, contrast)
-            per_lam = [dict(lam=float(lam), **mean_ci(
-                [v for v in D[:, j] if not np.isnan(v)], alpha))
+            per_lambda[f"{model}|{contrast}"] = [
+                dict(lam=float(lam), **mean_ci(
+                    [v for v in D[:, j] if not np.isnan(v)], alpha))
                 for j, lam in enumerate(grid)]
-            be = []
-            for tau in thresholds:
-                est = break_even(grid, D, tau, alpha)
-                est["bootstrap"] = bootstrap_break_even(
-                    grid, D, tau, alpha, B=B, seed=boot_seed)
-                be.append(est)
-            out[f"{model}|{contrast}"] = {"per_lambda": per_lam,
-                                          "break_even": be}
-    return out
+            crossings[contrast]["by_model"][model] = [
+                crossing_entry(grid, D, tau, alpha, B, boot_seed)
+                for tau in thresholds]
+    return crossings, per_lambda
+
+
+def build_spec(args, models) -> dict:
+    """Everything that can change an E10 number; the lock must match it."""
+    return {
+        "arm": ARM, "seed_base": args.seed_base, "R": args.R,
+        "grid": list(args.lambda_grid), "models": list(models),
+        "n_train": args.n_train, "n_test": args.n_test, "k_star": args.k_star,
+        "test_seed_offset": seed_guard.TEST_SEED_OFFSET,
+        "identity_rng_stream": True,
+        "flags": {"path": "piecewise low->mid->high",
+                  "b": args.b, "prevalence": args.prevalence,
+                  "thresholds": list(args.thresholds), "alpha": args.alpha,
+                  "bootstrap_B": args.bootstrap_B,
+                  "bootstrap_seed": (args.seed_base if args.bootstrap_seed
+                                     is None else args.bootstrap_seed)},
+        "environment": environment(),
+    }
 
 
 def main(argv=None):
@@ -104,7 +160,8 @@ def main(argv=None):
     ap.add_argument("--seed-base", type=int, required=True)
     ap.add_argument("--R", type=int, required=True)
     ap.add_argument("--addendum-lock", default=None)
-    ap.add_argument("--n-train", type=int, default=10000)
+    # D2/D1 of the confirmatory lock: train 8000, test 10000
+    ap.add_argument("--n-train", type=int, default=8000)
     ap.add_argument("--n-test", type=int, default=10000)
     ap.add_argument("--k-star", type=int, default=500)
     ap.add_argument("--lambda-grid", type=float, nargs="+",
@@ -121,17 +178,24 @@ def main(argv=None):
     ap.add_argument("--bootstrap-seed", type=int, default=None,
                     help="default: the seed base (not a DGP seed)")
     ap.add_argument("--workers", type=int, default=4)
-    ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--out-dir", default=None)
+    ap.add_argument("--print-spec", action="store_true",
+                    help="print the run spec (the lock's `spec`) and exit")
     args = ap.parse_args(argv)
 
     for m in (PRIMARY_MODEL, CONTRAST_MODEL):
         if m not in args.models:
             sys.exit(f"{m} is always fitted and must be listed in --models")
     models = [m for m in MODELS if m in args.models]
+    spec = build_spec(args, models)
+    if args.print_spec:
+        print(json.dumps(spec, indent=2))
+        return
+    if args.out_dir is None:
+        ap.error("--out-dir is required")
     try:
         mode = seed_guard.check_seeds(
-            args.seed_base, args.R, args.addendum_lock,
-            lock_spec={"arm": ARM, "grid": args.lambda_grid, "models": models})
+            args.seed_base, args.R, args.addendum_lock, lock_spec=spec)
     except seed_guard.SeedGuardError as e:
         print(f"REFUSING TO RUN\n\n{e}", file=sys.stderr)
         sys.exit(2)
@@ -141,7 +205,7 @@ def main(argv=None):
     if grid != args.lambda_grid:
         sys.exit("--lambda-grid must be strictly increasing without repeats")
     for lam in grid:
-        lambda_block(lam)   # raises outside [0, 1]
+        lambda_block(lam)   # raises outside [0, 2]
     boot_seed = (args.seed_base if args.bootstrap_seed is None
                  else args.bootstrap_seed)
 
@@ -197,12 +261,19 @@ def main(argv=None):
     wall = time.time() - t0
 
     records.sort(key=lambda r: (r["lambda_index"], r["replicate_id"]))
+    crossings, per_lambda = summarize(records, grid, args.R, args.thresholds,
+                                      args.alpha, args.bootstrap_B, boot_seed,
+                                      models)
+    # key order is the reading order: both crossing tables lead, side by side
     out = {
+        "gain_threshold_crossing_T2_minus_T4": crossings["T2_minus_T4"],
+        "gain_threshold_crossing_T2_minus_T3": crossings["T2_minus_T3"],
+        "per_lambda_delta": per_lambda,
         "arm": ARM,
         "status": "EXPLORATORY",
         "halted": halted,
-        "primary_estimand": "lambda_star_mean",
-        "secondary_estimand": "lambda_star_LB",
+        "primary_estimand": "crossing_mean",
+        "secondary_estimand": "crossing_LB",
         "path": "piecewise: [0,1] s=low->mid, [1,2] s=mid->high; kink at 1",
         "identity_rng_stream": True,
         "models": models,
@@ -211,6 +282,7 @@ def main(argv=None):
         "seed_base": args.seed_base,
         "test_seed_offset": seed_guard.TEST_SEED_OFFSET,
         "addendum_lock": args.addendum_lock,
+        "run_spec": spec,
         "args": vars(args),
         "provenance": prov,
         "lambda_grid": grid,
@@ -224,8 +296,6 @@ def main(argv=None):
         "wall_seconds_total": wall,
         "wall_seconds_per_unit": [r["wall_seconds"] for r in records],
         "failures_per_lambda": dict(zip((f"{g:g}" for g in grid), fails_at)),
-        "results": summarize(records, grid, args.R, args.thresholds,
-                             args.alpha, args.bootstrap_B, boot_seed, models),
     }
     with open(summ_path, "w") as f:
         json.dump(out, f, indent=2, default=float)

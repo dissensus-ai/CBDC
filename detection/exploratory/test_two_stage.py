@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "confirmatory"))
 
 from endpoint import missed_per_10k, select_alerts  # noqa: E402
-from two_stage import (gap_recovered, kprime_summary, make_hook,  # noqa: E402
+from two_stage import (gap_recovered, make_hook, recovery_summary,  # noqa: E402
                        missed_per_10k_from_set, shortlist_size,
                        two_stage_select)
 
@@ -143,28 +143,83 @@ def test_full_refit_matches_fitted_model():
         assert np.array_equal(a, b)
 
 
-def test_kprime_summary_known_curve():
-    grid = [500, 1000, 2000, 10000]
-    # miss_T2 = 20, miss_hi = 10 in every replicate; two-stage misses give
-    # ratio-of-means shares 0, 0.4, 0.95, 1.0
-    reps = {r: {500: (20.0, 20.0, 10.0), 1000: (20.0, 16.0, 10.0),
-                2000: (20.0, 10.5, 10.0), 10000: (20.0, 10.0, 10.0)}
-            for r in range(6)}
-    out = kprime_summary(reps, grid, B=200, seed=1)
-    shares = [c["share"] for c in out["curve"]]
-    assert shares == [0.0, 0.4, 0.95, 1.0]
+GRID4 = [500, 1000, 2000, 10000]
+
+
+def _reps(miss_t2, miss_hi, miss_2s_by_k, R=6, jitter=0.0, seed=0):
+    rng = np.random.default_rng(seed)
+    out = {}
+    for r in range(R):
+        e = rng.normal(scale=jitter) if jitter else 0.0
+        out[r] = {k: (miss_t2 + e, m2s + e, miss_hi + e)
+                  for k, m2s in miss_2s_by_k.items()}
+    return out
+
+
+def test_recovery_known_curve():
+    # miss_T2 = 20, miss_hi = 10 in every replicate; ratio-of-means shares
+    # 0, 0.4, 0.95, 1.0
+    reps = _reps(20.0, 10.0, {500: 20.0, 1000: 16.0, 2000: 10.5, 10000: 10.0})
+    out = recovery_summary(reps, GRID4, B=200, seed=1)
+    assert out["status"] == "computed" and out["flags"] == []
+    assert out["role"] == "secondary_annotation"
+    assert [c["share"] for c in out["curve"]] == [0.0, 0.4, 0.95, 1.0]
     assert out["K_q"]["0.5"]["mean"] == 2000
     assert out["K_q"]["0.9"]["mean"] == 2000
-    # no replicate variation -> the bootstrap band collapses onto the point
-    assert out["K_q"]["0.5"]["LB"] == 2000
+    assert out["K_q"]["0.5"]["LB"] == 2000        # no variation: band = point
+    assert out["bootstrap"]["n_not_applicable"] == 0
     # a replicate missing a grid point is excluded from every point
     reps[99] = {500: (20.0, 20.0, 10.0)}
-    assert kprime_summary(reps, grid, B=10)["n_replicates"] == 6
-    # zero gap -> NaN share, never reaches q
-    flat = {r: {g: (10.0, 10.0, 10.0) for g in grid} for r in range(3)}
-    z = kprime_summary(flat, grid, B=10)
-    assert all(math.isnan(c["share"]) for c in z["curve"])
-    assert z["K_q"]["0.5"] == {"mean": None, "LB": None}
+    assert recovery_summary(reps, GRID4, B=10)["n_replicates"] == 6
+
+
+def test_recovery_not_applicable_when_identity_increases_misses():
+    """Toy from review: misses go 10 -> 20 under full identity. There is no
+    gain to recover; no share and no K'_q may be reported."""
+    reps = _reps(10.0, 20.0, {500: 10.0, 1000: 12.0, 2000: 15.0, 10000: 20.0})
+    out = recovery_summary(reps, GRID4, B=100, seed=1)
+    assert out["status"] == "not_applicable"
+    assert out["reason"] == "nonpositive_reference_gain"
+    assert out["reference_gain"]["mean"] == -10.0
+    assert out["curve"] == "not_applicable"
+    assert out["mean_of_ratios"] == "not_applicable"
+    assert out["K_q"] == {"0.5": {"mean": "not_applicable",
+                                  "LB": "not_applicable"},
+                          "0.9": {"mean": "not_applicable",
+                                  "LB": "not_applicable"}}
+    # zero gain is not applicable either
+    z = recovery_summary(_reps(10.0, 10.0, {g: 10.0 for g in GRID4}), GRID4,
+                         B=10)
+    assert z["status"] == "not_applicable"
+
+
+def test_recovery_not_separated_is_flagged_and_bootstrap_counts_na():
+    # mean gain slightly positive, noisy across replicates: the t-interval of
+    # the gain includes 0 and some bootstrap draws have nonpositive gain
+    rng = np.random.default_rng(4)
+    reps = {}
+    for r in range(8):
+        g = 0.5 + rng.normal(scale=3.0)
+        reps[r] = {k: (20.0, 20.0 - f * g, 20.0 - g)
+                   for k, f in zip(GRID4, (0.0, 0.3, 0.8, 1.0))}
+    out = recovery_summary(reps, GRID4, B=500, seed=2)
+    ref = out["reference_gain"]
+    if ref["mean"] <= 0:       # guard the fixture itself
+        raise AssertionError("fixture should have positive mean gain")
+    assert ref["ci_lo"] <= 0 <= ref["ci_hi"]
+    assert out["status"] == "computed"
+    assert out["flags"] == ["reference_gain_not_separated"]
+    na = out["bootstrap"]["n_not_applicable"]
+    assert 0 < na < 500
+    assert out["bootstrap"]["p_not_applicable"] == na / 500
+    c = out["curve"][-1]
+    assert c["band_conditional_on_positive_reference_gain"]["n"] == 500 - na
+    # when not-applicable draws exceed the lower tail, the all-draws lower
+    # limit is in that mass: None + label, and K'_q_LB cannot be reached
+    if na > 0.05 * 500:
+        assert c["band_all_draws"]["lo"] is None
+        assert c["band_all_draws"]["lo_label"] == "in not-applicable mass"
+        assert out["K_q"]["0.5"]["LB"] is None
 
 
 if __name__ == "__main__":

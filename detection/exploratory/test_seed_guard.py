@@ -20,8 +20,26 @@ from seed_guard import (DEV_SEED_MAX, SeedGuardError,  # noqa: E402
 from seed_scan import raw_hits, structured_hits  # noqa: E402
 
 BASE = 2_026_120_001
-SPEC = {"arm": "E10", "grid": [0.0, 1.0, 2.0],
-        "models": ["gboost", "logit", "additive"]}
+
+
+def make_spec(base=BASE, R=5, **over):
+    """A full E10-shaped run spec; keyword overrides replace top-level keys."""
+    spec = {"arm": "E10", "seed_base": base, "R": R, "grid": [0.0, 1.0, 2.0],
+            "models": ["gboost", "logit", "additive"], "n_train": 8000,
+            "n_test": 10000, "k_star": 500,
+            "test_seed_offset": TEST_SEED_OFFSET,
+            "identity_rng_stream": True,
+            "flags": {"b": "mid", "prevalence": 0.05, "thresholds": [0.0, 1.0],
+                      "alpha": 0.1, "bootstrap_B": 2000,
+                      "bootstrap_seed": base},
+            "environment": {"python": "3.14.7", "numpy": "2.3.5",
+                            "scipy": "1.16.3", "sklearn": "1.8.0",
+                            "pandas": "2.3.3", "requirements_sha256": "ab" * 32}}
+    spec.update(over)
+    return spec
+
+
+SPEC = make_spec()
 
 
 def _refuses(*a, **kw):
@@ -35,7 +53,7 @@ def _refuses(*a, **kw):
 class _Repo:
     """Temporary git repo holding a protocol file, a freeze commit, a lock."""
 
-    def __init__(self, base=BASE, R=5, spec=SPEC):
+    def __init__(self, base=BASE, R=5):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = self.tmp.name
         self.registry = os.path.join(self.root, "SPENT_SEEDS.json")
@@ -50,16 +68,16 @@ class _Repo:
             ["git", "-C", self.root, "rev-parse", "HEAD"], capture_output=True,
             text=True, check=True).stdout.strip()
         self.lock = os.path.join(self.root, "e10_lock.json")
-        al.write_lock(self.lock, seed_base=base, R=R,
-                      protocol_file="PROTO.md", freeze_commit=self.commit,
-                      offset=TEST_SEED_OFFSET, root=self.root,
-                      registry=self.registry, **spec)
+        al.write_lock(self.lock, make_spec(base, R), protocol_file="PROTO.md",
+                      freeze_commit=self.commit, root=self.root,
+                      registry=self.registry)
 
-    def check(self, base=BASE, R=5, spec=SPEC):
+    def check(self, base=BASE, R=5, spec=None):
+        spec = make_spec(base, R) if spec is None else spec
         return check_seeds(base, R, self.lock, lock_spec=spec, root=self.root,
                            registry=self.registry)
 
-    def refuses(self, base=BASE, R=5, spec=SPEC):
+    def refuses(self, base=BASE, R=5, spec=None):
         try:
             self.check(base, R, spec)
         except SeedGuardError:
@@ -108,11 +126,57 @@ def test_lock_must_match_run_exactly():
     try:
         assert r.refuses(R=6)
         assert r.refuses(base=BASE + 1)
-        assert r.refuses(spec={**SPEC, "arm": "E9"})
-        assert r.refuses(spec={**SPEC, "grid": [0.0, 1.0]})
-        assert r.refuses(spec={**SPEC, "models": ["gboost", "logit"]})
-        assert r.check(spec={**SPEC, "models": ["additive", "logit",
-                                                "gboost"]}) == "ADDENDUM"
+        assert r.refuses(spec=make_spec(arm="E9"))
+        assert r.refuses(spec=make_spec(grid=[0.0, 1.0]))
+        assert r.refuses(spec=make_spec(models=["gboost", "logit"]))
+        # model ORDER is not part of the spec; the fitted set is
+        assert r.check(spec=make_spec(models=["additive", "logit",
+                                              "gboost"])) == "ADDENDUM"
+        # grid ints vs floats are the same grid
+        assert r.check(spec=make_spec(grid=[0, 1, 2])) == "ADDENDUM"
+    finally:
+        r.close()
+
+
+def test_lock_refuses_run_differing_only_in_n_train():
+    r = _Repo()
+    try:
+        assert r.check() == "ADDENDUM"
+        assert r.refuses(spec=make_spec(n_train=10000))
+        try:
+            check_seeds(BASE, 5, r.lock, lock_spec=make_spec(n_train=10000),
+                        root=r.root, registry=r.registry)
+        except SeedGuardError as e:
+            assert "n_train" in str(e)
+        else:
+            raise AssertionError("n_train drift should be refused")
+    finally:
+        r.close()
+
+
+def test_lock_refuses_every_other_drift():
+    r = _Repo()
+    base_spec = make_spec()
+    drifts = [
+        make_spec(n_test=8000), make_spec(k_star=300),
+        make_spec(identity_rng_stream=False),
+        make_spec(flags={**base_spec["flags"], "b": "high"}),
+        make_spec(flags={**base_spec["flags"], "thresholds": [0.0]}),
+        make_spec(flags={**base_spec["flags"], "bootstrap_B": 500}),
+        make_spec(environment={**base_spec["environment"], "sklearn": "1.9.0"}),
+        make_spec(environment={**base_spec["environment"],
+                               "requirements_sha256": "cd" * 32}),
+    ]
+    try:
+        for d in drifts:
+            assert r.refuses(spec=d), d
+        # an offset change is refused before the lock is even read
+        assert r.refuses(spec=make_spec(test_seed_offset=1))
+        # a spec with a missing or unknown key is refused
+        bad = make_spec()
+        bad.pop("k_star")
+        assert r.refuses(spec=bad)
+        assert r.refuses(spec=make_spec(extra_knob=1))
     finally:
         r.close()
 
@@ -124,7 +188,7 @@ def test_lock_missing_or_tampered_refused():
                         lock_spec=SPEC, root=r.root, registry=r.registry)
         with open(r.lock) as f:
             lock = json.load(f)
-        lock["R"] = 6                              # edit without re-hashing
+        lock["spec"]["R"] = 6                      # edit without re-hashing
         with open(r.lock, "w") as f:
             json.dump(lock, f)
         assert r.refuses(R=6)
@@ -194,10 +258,9 @@ def test_recorded_seed_in_results_blocks_lock():
             f.write(json.dumps({"train_seed": BASE + 3, "x": 1}) + "\n")
         assert r.refuses()
         try:
-            al.write_lock(os.path.join(r.root, "again_lock.json"),
-                          seed_base=BASE, R=5, protocol_file="PROTO.md",
-                          freeze_commit=r.commit, offset=TEST_SEED_OFFSET,
-                          root=r.root, registry=r.registry, **SPEC)
+            al.write_lock(os.path.join(r.root, "again_lock.json"), make_spec(),
+                          protocol_file="PROTO.md", freeze_commit=r.commit,
+                          root=r.root, registry=r.registry)
         except al.AddendumLockError:
             pass
         else:

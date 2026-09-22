@@ -25,7 +25,6 @@ for _v in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS",
 
 import argparse  # noqa: E402
 import json  # noqa: E402
-import math  # noqa: E402
 import time  # noqa: E402
 from concurrent.futures import ProcessPoolExecutor, as_completed  # noqa: E402
 
@@ -36,15 +35,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(HERE), "confirmatory"))
 
 import addendum_lock  # noqa: E402
 import seed_guard  # noqa: E402
-from _driver_common import MAX_WORKERS, provenance  # noqa: E402
+from _driver_common import MAX_WORKERS, environment, provenance  # noqa: E402
 from inference import mean_ci  # noqa: E402
 from replicate import run_replicate  # noqa: E402
 from two_stage import (DEFAULT_KPRIME_GRID, STAGE2_TIERS,  # noqa: E402
-                       TRAIN_VARIANTS, kprime_summary, make_hook)
+                       TRAIN_VARIANTS, make_hook, recovery_summary)
 
 ARM = "E9"
 MODELS = ["gboost", "logit"]   # what run_replicate fits
 STOP_FAIL_RATE = 0.10
+PRIMARY_CELL = {"model": "gboost", "stage2_tier": "T4", "train_variant": "full"}
 
 
 def _job(a):
@@ -55,64 +55,80 @@ def _job(a):
     return rec
 
 
-def summarize(records, alpha=0.10):
-    """Per (model, stage2_tier, train_variant, K'*) cell across OK replicates.
-
-    gap_recovered is reported two ways and the addendum must pick one:
-      mean_of_ratios   mean over replicates of the per-replicate fraction,
-                       NaN (gap_zero) replicates dropped and counted
-      ratio_of_means   (mean miss_T2 - mean miss_2s) / (mean miss_T2 -
-                       mean miss_hi), over replicates with the row present
-    """
+def _cells(records):
     cells = {}
     for r in records:
         if r["status"] != "OK":
             continue
         for row in r.get("two_stage", []):
-            key = (row["model"], row["stage2_tier"], row["train_variant"],
-                   row["kprime_star"])
-            cells.setdefault(key, []).append(row)
+            key = (row["model"], row["stage2_tier"], row["train_variant"])
+            cells.setdefault(key, []).append((r["replicate_id"], row))
+    return cells
+
+
+def primary_absolute(records, alpha=0.10):
+    """THE E9 PRIMARY OUTPUT: missed per 10k against test-time identity lookups
+    per 10k (K'), per (model, stage-2 tier, training variant), with 90%
+    t-intervals, plus the two single-stage reference points (T2 = no identity
+    lookups, hi tier = identity for all n). Makes no ratio, so it is defined
+    whatever the sign of the single-stage identity gain."""
     out = []
-    for (model, tier, variant, kps), rows in sorted(cells.items()):
-        miss = [x["MissedPer10k"] for x in rows]
-        gaps = [x["gap_recovered"] for x in rows
-                if not (isinstance(x["gap_recovered"], float)
-                        and math.isnan(x["gap_recovered"]))]
-        m2 = sum(x["miss_T2"] for x in rows) / len(rows)
-        mh = sum(x["miss_hi"] for x in rows) / len(rows)
-        ms = sum(miss) / len(miss)
-        denom = m2 - mh
+    for (model, tier, variant), pairs in sorted(_cells(records).items()):
+        by_k = {}
+        for rid, row in pairs:
+            by_k.setdefault(row["kprime_star"], []).append(row)
+        rows0 = next(iter(by_k.values()))
         out.append({
             "model": model, "stage2_tier": tier, "train_variant": variant,
-            "kprime_star": kps,
-            "DisclosedPer10k_mean": sum(x["DisclosedPer10k"] for x in rows)
-            / len(rows),
-            "MissedPer10k": mean_ci(miss, alpha),
-            "miss_T2_mean": m2, "miss_hi_mean": mh,
-            "gap_recovered_mean_of_ratios": mean_ci(gaps, alpha),
-            "gap_recovered_ratio_of_means": (
-                (m2 - ms) / denom if abs(denom) >= 1e-9 else None),
-            "n_gap_zero": sum(x["gap_flag"] == "gap_zero" for x in rows),
-            "n_gap_negative": sum(x["gap_flag"] == "gap_negative"
-                                  for x in rows),
-            "R_rows": len(rows),
+            "is_primary_cell": {"model": model, "stage2_tier": tier,
+                                "train_variant": variant} == PRIMARY_CELL,
+            "single_stage_T2_MissedPer10k": mean_ci(
+                [x["miss_T2"] for x in rows0], alpha),
+            f"single_stage_{tier}_MissedPer10k": mean_ci(
+                [x["miss_hi"] for x in rows0], alpha),
+            "curve": [{
+                "kprime_star": kps,
+                "IdentityLookupsPer10k": (sum(x["DisclosedPer10k"] for x in rows)
+                                          / len(rows)),
+                "MissedPer10k": mean_ci([x["MissedPer10k"] for x in rows],
+                                        alpha),
+                "R_rows": len(rows),
+                "n_gap_zero": sum(x["gap_flag"] == "gap_zero" for x in rows),
+                "n_gap_negative": sum(x["gap_flag"] == "gap_negative"
+                                      for x in rows),
+            } for kps, rows in sorted(by_k.items())],
         })
     return out
 
 
-def kprime_stats(records, grid, B, seed):
-    """K'_50 / K'_90 per (model, stage2_tier, train_variant) -- addendum E9."""
-    per = {}
-    for r in records:
-        if r["status"] != "OK":
-            continue
-        for row in r.get("two_stage", []):
-            key = f"{row['model']}|{row['stage2_tier']}|{row['train_variant']}"
-            per.setdefault(key, {}).setdefault(r["replicate_id"], {})[
-                row["kprime_star"]] = (row["miss_T2"], row["MissedPer10k"],
-                                       row["miss_hi"])
-    return {k: kprime_summary(v, grid, B=B, seed=seed)
-            for k, v in sorted(per.items())}
+def recovery(records, grid, B, seed, alpha=0.10):
+    """Secondary: reference gain + recovered share + K'_q, gated on the sign
+    of the single-stage identity gain (two_stage.recovery_summary)."""
+    out = {}
+    for (model, tier, variant), pairs in sorted(_cells(records).items()):
+        reps = {}
+        for rid, row in pairs:
+            reps.setdefault(rid, {})[row["kprime_star"]] = (
+                row["miss_T2"], row["MissedPer10k"], row["miss_hi"])
+        out[f"{model}|{tier}|{variant}"] = recovery_summary(
+            reps, grid, B=B, seed=seed, alpha=alpha)
+    return out
+
+
+def build_spec(args) -> dict:
+    """Everything that can change an E9 number; the lock must match it."""
+    return {
+        "arm": ARM, "seed_base": args.seed_base, "R": args.R,
+        "grid": list(args.kprime_grid), "models": list(MODELS),
+        "n_train": args.n_train, "n_test": args.n_test, "k_star": args.k_star,
+        "test_seed_offset": seed_guard.TEST_SEED_OFFSET,
+        "identity_rng_stream": False,       # confirmatory default world
+        "flags": {"stage2_tiers": list(args.stage2_tiers),
+                  "train_variants": list(args.train_variants),
+                  "stage1_train_scores": args.stage1_train_scores,
+                  "alpha": args.alpha, "bootstrap_B": args.bootstrap_B},
+        "environment": environment(),
+    }
 
 
 def main(argv=None):
@@ -120,7 +136,8 @@ def main(argv=None):
     ap.add_argument("--seed-base", type=int, required=True)
     ap.add_argument("--R", type=int, required=True)
     ap.add_argument("--addendum-lock", default=None)
-    ap.add_argument("--n-train", type=int, default=10000)
+    # D2/D1 of the confirmatory lock: train 8000, test 10000
+    ap.add_argument("--n-train", type=int, default=8000)
     ap.add_argument("--n-test", type=int, default=10000)
     ap.add_argument("--k-star", type=int, default=500)
     ap.add_argument("--kprime-grid", type=int, nargs="+",
@@ -134,14 +151,21 @@ def main(argv=None):
     ap.add_argument("--alpha", type=float, default=0.10)
     ap.add_argument("--bootstrap-B", type=int, default=2000)
     ap.add_argument("--workers", type=int, default=4)
-    ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--out-dir", default=None)
+    ap.add_argument("--print-spec", action="store_true",
+                    help="print the run spec (the lock's `spec`) and exit")
     args = ap.parse_args(argv)
+    spec = build_spec(args)
+    if args.print_spec:
+        print(json.dumps(spec, indent=2))
+        return
+    if args.out_dir is None:
+        ap.error("--out-dir is required")
 
     try:
         mode = seed_guard.check_seeds(
             args.seed_base, args.R, args.addendum_lock,
-            lock_spec={"arm": ARM, "grid": args.kprime_grid,
-                       "models": MODELS})
+            lock_spec=spec)
     except seed_guard.SeedGuardError as e:
         print(f"REFUSING TO RUN\n\n{e}", file=sys.stderr)
         sys.exit(2)
@@ -203,30 +227,37 @@ def main(argv=None):
 
     records.sort(key=lambda r: r["replicate_id"])
     ok = [r for r in records if r["status"] == "OK"]
+    # key order is the reading order: the absolute table comes first
     out = {
+        "primary_absolute_missed_vs_identity_lookups": {
+            "description": "E9 primary output: missed illicit entities per "
+                           "10k vs test-time identity lookups per 10k (K'), "
+                           "replicate means with 90% t-intervals. Recovery "
+                           "shares are a secondary annotation (below).",
+            "primary_cell": PRIMARY_CELL,
+            "cells": primary_absolute(records, args.alpha),
+        },
         "arm": ARM,
         "status": "EXPLORATORY",
         "halted": halted,
-        "primary_cell": {"model": "gboost", "stage2_tier": "T4",
-                         "train_variant": "full",
-                         "recovered_share": "gap_recovered_ratio_of_means"},
         "R": args.R,
+        "R_planned": args.R, "R_ok": len(ok),
         "seed_mode": mode,
         "seed_base": args.seed_base,
         "test_seed_offset": seed_guard.TEST_SEED_OFFSET,
         "addendum_lock": args.addendum_lock,
+        "run_spec": spec,
         "args": vars(args),
         "provenance": prov,
         "stage2_training_default": "full",
-        "R_planned": args.R, "R_ok": len(ok),
         "failures": [{k: r.get(k) for k in ("replicate_id", "train_seed",
                                             "test_seed", "status", "error")}
                      for r in records if r["status"] != "OK"],
         "wall_seconds_total": wall,
         "wall_seconds_per_replicate": [r["wall_seconds"] for r in records],
-        "cells": summarize(records, args.alpha),
-        "kprime_q": kprime_stats(records, args.kprime_grid, args.bootstrap_B,
-                                 args.seed_base),
+        "recovery_secondary": recovery(records, args.kprime_grid,
+                                       args.bootstrap_B, args.seed_base,
+                                       args.alpha),
     }
     with open(summ_path, "w") as f:
         json.dump(out, f, indent=2, default=float)
