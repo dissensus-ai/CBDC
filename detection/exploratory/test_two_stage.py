@@ -17,8 +17,9 @@ sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "confirmatory"))
 
 from endpoint import missed_per_10k, select_alerts  # noqa: E402
-from two_stage import (gap_recovered, make_hook, missed_per_10k_from_set,  # noqa: E402
-                       shortlist_size, two_stage_select)
+from two_stage import (gap_recovered, kprime_summary, make_hook,  # noqa: E402
+                       missed_per_10k_from_set, shortlist_size,
+                       two_stage_select)
 
 
 def _synthetic(n=400, seed=1, ties=True):
@@ -140,6 +141,30 @@ def test_full_refit_matches_fitted_model():
         idx = np.sort(np.arange(300))
         b = _models(7)[name].fit(x[idx], y[idx]).predict_proba(x)[:, 1]
         assert np.array_equal(a, b)
+
+
+def test_kprime_summary_known_curve():
+    grid = [500, 1000, 2000, 10000]
+    # miss_T2 = 20, miss_hi = 10 in every replicate; two-stage misses give
+    # ratio-of-means shares 0, 0.4, 0.95, 1.0
+    reps = {r: {500: (20.0, 20.0, 10.0), 1000: (20.0, 16.0, 10.0),
+                2000: (20.0, 10.5, 10.0), 10000: (20.0, 10.0, 10.0)}
+            for r in range(6)}
+    out = kprime_summary(reps, grid, B=200, seed=1)
+    shares = [c["share"] for c in out["curve"]]
+    assert shares == [0.0, 0.4, 0.95, 1.0]
+    assert out["K_q"]["0.5"]["mean"] == 2000
+    assert out["K_q"]["0.9"]["mean"] == 2000
+    # no replicate variation -> the bootstrap band collapses onto the point
+    assert out["K_q"]["0.5"]["LB"] == 2000
+    # a replicate missing a grid point is excluded from every point
+    reps[99] = {500: (20.0, 20.0, 10.0)}
+    assert kprime_summary(reps, grid, B=10)["n_replicates"] == 6
+    # zero gap -> NaN share, never reaches q
+    flat = {r: {g: (10.0, 10.0, 10.0) for g in grid} for r in range(3)}
+    z = kprime_summary(flat, grid, B=10)
+    assert all(math.isnan(c["share"]) for c in z["curve"])
+    assert z["K_q"]["0.5"] == {"mean": None, "LB": None}
 
 
 if __name__ == "__main__":

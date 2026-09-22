@@ -40,7 +40,7 @@ from _driver_common import MAX_WORKERS, provenance  # noqa: E402
 from inference import mean_ci  # noqa: E402
 from replicate import run_replicate  # noqa: E402
 from two_stage import (DEFAULT_KPRIME_GRID, STAGE2_TIERS,  # noqa: E402
-                       TRAIN_VARIANTS, make_hook)
+                       TRAIN_VARIANTS, kprime_summary, make_hook)
 
 ARM = "E9"
 MODELS = ["gboost", "logit"]   # what run_replicate fits
@@ -100,6 +100,21 @@ def summarize(records, alpha=0.10):
     return out
 
 
+def kprime_stats(records, grid, B, seed):
+    """K'_50 / K'_90 per (model, stage2_tier, train_variant) -- addendum E9."""
+    per = {}
+    for r in records:
+        if r["status"] != "OK":
+            continue
+        for row in r.get("two_stage", []):
+            key = f"{row['model']}|{row['stage2_tier']}|{row['train_variant']}"
+            per.setdefault(key, {}).setdefault(r["replicate_id"], {})[
+                row["kprime_star"]] = (row["miss_T2"], row["MissedPer10k"],
+                                       row["miss_hi"])
+    return {k: kprime_summary(v, grid, B=B, seed=seed)
+            for k, v in sorted(per.items())}
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--seed-base", type=int, required=True)
@@ -117,6 +132,7 @@ def main(argv=None):
     ap.add_argument("--stage1-train-scores", default="oof",
                     choices=["insample", "oof"])
     ap.add_argument("--alpha", type=float, default=0.10)
+    ap.add_argument("--bootstrap-B", type=int, default=2000)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out-dir", required=True)
     args = ap.parse_args(argv)
@@ -209,6 +225,8 @@ def main(argv=None):
         "wall_seconds_total": wall,
         "wall_seconds_per_replicate": [r["wall_seconds"] for r in records],
         "cells": summarize(records, args.alpha),
+        "kprime_q": kprime_stats(records, args.kprime_grid, args.bootstrap_B,
+                                 args.seed_base),
     }
     with open(summ_path, "w") as f:
         json.dump(out, f, indent=2, default=float)

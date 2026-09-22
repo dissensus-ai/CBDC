@@ -40,6 +40,7 @@ from __future__ import annotations
 import math
 import os
 import sys
+import warnings
 
 import numpy as np
 
@@ -221,3 +222,61 @@ def make_hook(kprime_grid=DEFAULT_KPRIME_GRID, stage2_tiers=STAGE2_TIERS,
             rec["two_stage_failures"] = fails
 
     return hook
+
+
+def kprime_summary(reps, grid, qs=(0.5, 0.9), B=2000, seed=0, level=0.90):
+    """Recovered-share curve and K'_q, the addendum's E9 summary statistics.
+
+    `reps` maps replicate id -> {K'*: (miss_T2, miss_2s, miss_hi)}; only
+    replicates carrying every grid point enter, so each K'* uses the same
+    replicate set. Share at K'* = ratio of replicate means (A0 primary):
+
+        (mean miss_T2 - mean miss_2s) / (mean miss_T2 - mean miss_hi)
+
+    NaN when the mean gap is below GAP_EPS. The band is a replicate bootstrap
+    (whole replicates resampled across all K'*), percentile at `level`.
+    K'_q = smallest grid K'* whose share >= q; K'_q_LB uses the bootstrap
+    lower limit instead ("reaches q demonstrably" -- R-dependent, like
+    lambda*_LB). None when no grid point reaches q.
+    """
+    grid = [int(g) for g in grid]
+    ids = sorted(r for r, d in reps.items() if all(g in d for g in grid))
+    if not ids:
+        return {"n_replicates": 0, "curve": [], "K_q": {}}
+    arr = np.array([[reps[r][g] for g in grid] for r in ids], dtype=float)
+
+    def share(a):
+        m = a.mean(axis=0)                       # (G, 3)
+        den = m[:, 0] - m[:, 2]
+        with np.errstate(invalid="ignore", divide="ignore"):
+            out = (m[:, 0] - m[:, 1]) / den
+        out[np.abs(den) < GAP_EPS] = np.nan
+        return out
+
+    point = share(arr)
+    rng = np.random.default_rng(seed)
+    boot = np.array([share(arr[rng.integers(0, len(ids), len(ids))])
+                     for _ in range(B)])
+    a = (1 - level) / 2
+    with warnings.catch_warnings():
+        # an all-NaN column is a zero-gap K'*: NaN band, reported as such
+        warnings.simplefilter("ignore", RuntimeWarning)
+        lo = np.nanquantile(boot, a, axis=0) if B else np.full(len(grid), np.nan)
+        hi = (np.nanquantile(boot, 1 - a, axis=0) if B
+              else np.full(len(grid), np.nan))
+
+    def first(vals, q):
+        for g, v in zip(grid, vals):
+            if not np.isnan(v) and v >= q:
+                return g
+        return None
+
+    return {
+        "n_replicates": len(ids),
+        "bootstrap": {"B": B, "seed": seed, "level": level},
+        "curve": [{"kprime_star": g, "share": float(p), "boot_lo": float(l),
+                   "boot_hi": float(h)}
+                  for g, p, l, h in zip(grid, point, lo, hi)],
+        "K_q": {f"{q:g}": {"mean": first(point, q), "LB": first(lo, q)}
+                for q in qs},
+    }
