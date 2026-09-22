@@ -1,34 +1,39 @@
-"""Arm B: a continuous identity-signal scale lambda in [0, 1]. EXPLORATORY.
+"""E10 (Arm B): a piecewise identity-signal path lambda in [0, 2]. EXPLORATORY.
 
 surface_configs exposes the identity-signal axis s as three parameter blocks.
-This module puts a scalar between the two ends:
+This module runs a path through all three (protocol addendum E9-E11, section 2):
 
-    param(lambda) = (1 - lambda) * param(s=low) + lambda * param(s=high)
+    lambda in [0, 1]:  (1 - t) * param(s=low) + t * param(s=mid),  t = lambda
+    lambda in [1, 2]:  (1 - t) * param(s=mid) + t * param(s=high), t = lambda-1
 
 for every identity-attribute field of DGPConfig (tuples element-wise), with
-behavior parameters, b and prevalence exactly as surface_configs sets them.
-The (1-l)*a + l*b form, not a + l*(b-a), is deliberate: it returns a and b
-bit-exactly at the endpoints, so lambda=0 IS s=low and lambda=1 IS s=high
-field-for-field (tested), not merely close in floating point.
+behaviour parameters, b and prevalence exactly as surface_configs sets them.
+The (1-t)*a + t*b form returns a and b bit-exactly, so lambda = 0, 1, 2 ARE
+s = low, mid, high field for field (tested). lambda = 1 is the paper's default
+world.
 
-Interpolation is over the RESOLVED blocks -- the field values world_config
-actually produces, defaults included -- not over the override dicts. s=low
-leaves the legit-side fields at their defaults; s=high overrides some of them
-(sar_lambda_legit 0.10 -> 0.05 etc.) and leaves acct_age_mu_launderer at the
-default 5.9, so along the line the legit side moves and the account-age gap
-opens fully by lambda=1 while other launderer parameters are still partway.
+Why piecewise. The 22 Sep dev build used a straight low -> high line and found
+s = mid is not on it: the lambda reproducing mid differs per parameter (0 for
+the legit-side fields, 0.27-0.54 for the launderer rates, 1 for account age),
+because s = high also moves legit-side parameters and leaves launderer account
+age at its default. A straight line would have excluded the headline world.
 
-s=mid is NOT on this line. `mid_position` computes, per scalar component,
-which lambda would reproduce mid; they disagree (0 for the legit-side fields,
-0.27-0.54 for the launderer rates, 1 for account age). A lambda curve is a new
-one-parameter family through the two endpoint worlds, not a refinement of the
-three-level surface, and must not be read as passing through the default world.
+THE KINK AT lambda = 1. The path is continuous but not differentiable there,
+and the two segments move different parameters: on [0, 1] only the launderer
+side moves (legit-side values are equal at low and mid) and launderer account
+age travels its whole range 6.3 -> 5.9; on [1, 2] account age is fixed while
+the legit side moves too (sar_lambda_legit 0.10 -> 0.05, kyc_low_prob_legit
+0.30 -> 0.20, juris_beta_legit[0] 2.0 -> 1.8). Equal lambda steps on the two
+segments are not equal steps in any common signal measure, so a lambda* on
+either side of 1 is read on that segment's own scale.
 
-RNG caveat: at a fixed seed, changing identity parameters changes the
-behavioral transactions too. dgp.generate draws identity attributes BEFORE
-behavior, and the Poisson/beta samplers consume a parameter-dependent number of
-uniforms. Worlds at different lambda with the same seed share labels and wallet
-counts, but not transactions -- they are not common random numbers.
+RNG. With DGPConfig.identity_rng_stream False, identity parameters change the
+behavioural draws too (the Poisson/beta samplers consume a parameter-dependent
+number of uniforms before behaviour is drawn). The E10 driver therefore sets
+identity_rng_stream=True, under which worlds at every lambda share labels,
+wallets and transactions at a given seed and differ only in identity columns:
+paired counterfactuals. Those paired worlds are a different realisation from
+the option-off worlds at the same seed, including at lambda = 1.
 """
 
 from __future__ import annotations
@@ -51,8 +56,10 @@ IDENTITY_FIELDS = (
     "acct_age_mu_launderer", "acct_age_mu_legit", "acct_age_sigma",
 )
 
-DEFAULT_LAMBDA_GRID = (0.0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6,
-                       0.7, 0.8, 0.9, 1.0)
+DEFAULT_LAMBDA_GRID = (0.0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
+LAMBDA_MAX = 2.0
+# lambda at each named block
+ANCHORS = {"low": 0.0, "mid": 1.0, "high": 2.0}
 
 
 def resolved_block(s: str) -> dict:
@@ -61,91 +68,92 @@ def resolved_block(s: str) -> dict:
     return {f: getattr(cfg, f) for f in IDENTITY_FIELDS}
 
 
-def _lerp(a: float, b: float, lam: float) -> float:
-    return (1.0 - lam) * a + lam * b
+def _lerp(a: float, b: float, t: float) -> float:
+    return (1.0 - t) * a + t * b
 
 
 def lambda_block(lam: float) -> dict:
     lam = float(lam)
-    if not 0.0 <= lam <= 1.0:
-        raise ValueError(f"lambda must be in [0, 1], got {lam}")
-    lo, hi = resolved_block("low"), resolved_block("high")
+    if not 0.0 <= lam <= LAMBDA_MAX:
+        raise ValueError(f"lambda must be in [0, {LAMBDA_MAX:g}], got {lam}")
+    if lam <= 1.0:
+        a_blk, b_blk, t = resolved_block("low"), resolved_block("mid"), lam
+    else:
+        a_blk, b_blk, t = resolved_block("mid"), resolved_block("high"), lam - 1.0
     out = {}
     for f in IDENTITY_FIELDS:
-        a, b = lo[f], hi[f]
+        a, b = a_blk[f], b_blk[f]
         if isinstance(a, tuple):
-            out[f] = tuple(_lerp(x, y, lam) for x, y in zip(a, b))
+            out[f] = tuple(_lerp(x, y, t) for x, y in zip(a, b))
         else:
-            out[f] = _lerp(a, b, lam)
+            out[f] = _lerp(a, b, t)
     return out
 
 
 def lambda_config(lam: float, seed: int, n_entities: int = 8000,
-                  b: str = "mid", prevalence: float = 0.05) -> DGPConfig:
-    """World at identity-signal lambda. Everything but the identity fields and
-    the label comes from world_config(b, s=low, prevalence)."""
+                  b: str = "mid", prevalence: float = 0.05,
+                  identity_rng_stream: bool = False) -> DGPConfig:
+    """World at identity-signal lambda. Everything but the identity fields,
+    identity_rng_stream and the label comes from world_config(b, s=low, p)."""
     cfg = world_config(b, "low", prevalence, seed=seed, n_entities=n_entities)
     for f, v in lambda_block(lam).items():
         setattr(cfg, f, v)
+    cfg.identity_rng_stream = bool(identity_rng_stream)
     cfg.label = f"b={b}|lambda={float(lam):g}|p={prevalence:g}"
     return cfg
 
 
-def cfg_factory(lam: float, b: str = "mid", prevalence: float = 0.05):
-    """(seed, n) -> DGPConfig, the shape replicate.run_replicate expects."""
+def cfg_factory(lam: float, b: str = "mid", prevalence: float = 0.05,
+                identity_rng_stream: bool = True):
+    """(seed, n) -> DGPConfig, the shape replicate.run_replicate expects.
+
+    Paired stream ON by default: this is the E10 driver's factory."""
     def make(seed, n_entities):
-        return lambda_config(lam, seed, n_entities, b, prevalence)
+        return lambda_config(lam, seed, n_entities, b, prevalence,
+                             identity_rng_stream)
     return make
 
 
-def mid_position(tol: float = 1e-9) -> dict:
-    """Where s=mid sits relative to the low->high line, per scalar component.
+def mid_position(tol: float = 0.0) -> dict:
+    """Confirms the anchors: lambda = 0, 1, 2 reproduce s = low, mid, high.
 
-    For each component: lambda_mid = (mid - low) / (high - low) when high !=
-    low; when high == low the component is constant along the line and is
-    either on it (mid == low) or off it for every lambda. `collinear` is True
-    only if every defined lambda_mid agrees within tol and no constant
-    component is off the line.
+    Returns per-anchor field mismatches (empty when exact) and, for the
+    record, the straight-line finding that motivated the piecewise path: the
+    lambda on a low -> high line that would reproduce each mid component.
     """
+    anchors = {}
+    for s_name, lam in ANCHORS.items():
+        ref, got = resolved_block(s_name), lambda_block(lam)
+        anchors[s_name] = {
+            "lambda": lam,
+            "mismatched_fields": [f for f in IDENTITY_FIELDS
+                                  if got[f] != ref[f]],
+        }
     lo, mid, hi = (resolved_block(s) for s in ("low", "mid", "high"))
-    comps = []
+    straight = {}
     for f in IDENTITY_FIELDS:
-        if isinstance(lo[f], tuple):
-            parts = [(f"{f}[{i}]", lo[f][i], mid[f][i], hi[f][i])
-                     for i in range(len(lo[f]))]
-        else:
-            parts = [(f, lo[f], mid[f], hi[f])]
-        for name, a, m, b in parts:
-            if abs(b - a) < tol:
-                comps.append({"component": name, "low": a, "mid": m, "high": b,
-                              "lambda_mid": None,
-                              "status": ("constant_on_line" if abs(m - a) < tol
-                                         else "constant_off_line")})
-            else:
-                lm = (m - a) / (b - a) + 0.0   # no -0.0 in the report
-                comps.append({"component": name, "low": a, "mid": m, "high": b,
-                              "lambda_mid": lm,
-                              "status": ("in_segment" if -tol <= lm <= 1 + tol
-                                         else "outside_segment")})
-    defined = [c["lambda_mid"] for c in comps if c["lambda_mid"] is not None]
-    off = any(c["status"] == "constant_off_line" for c in comps)
-    collinear = (not off and bool(defined)
-                 and max(defined) - min(defined) < tol)
+        parts = (list(zip(lo[f], mid[f], hi[f])) if isinstance(lo[f], tuple)
+                 else [(lo[f], mid[f], hi[f])])
+        for i, (a, m, b) in enumerate(parts):
+            name = f"{f}[{i}]" if isinstance(lo[f], tuple) else f
+            straight[name] = (None if b == a
+                              else (m - a) / (b - a) + 0.0)  # no -0.0
+    defined = [v for v in straight.values() if v is not None]
     return {
-        "components": comps,
-        "collinear": collinear,
-        "lambda_mid_min": min(defined) if defined else None,
-        "lambda_mid_max": max(defined) if defined else None,
-        "lambda_mid_common": defined[0] if collinear else None,
+        "anchors": anchors,
+        "lambda_1_equals_mid": not anchors["mid"]["mismatched_fields"],
+        "all_anchors_exact": all(not a["mismatched_fields"]
+                                 for a in anchors.values()),
+        "straight_line_lambda_for_mid": straight,
+        "straight_line_collinear": max(defined) - min(defined) <= tol,
     }
 
 
 if __name__ == "__main__":
     rep = mid_position()
-    print(f"{'component':<26}{'low':>8}{'mid':>8}{'high':>8}  lambda_mid")
-    for c in rep["components"]:
-        lm = "-" if c["lambda_mid"] is None else f"{c['lambda_mid']:.4f}"
-        print(f"{c['component']:<26}{c['low']:>8.3g}{c['mid']:>8.3g}"
-              f"{c['high']:>8.3g}  {lm:<8} {c['status']}")
-    print(f"\ncollinear: {rep['collinear']}  lambda_mid range "
-          f"[{rep['lambda_mid_min']:.4f}, {rep['lambda_mid_max']:.4f}]")
+    for s_name, a in rep["anchors"].items():
+        print(f"lambda={a['lambda']:g} == s={s_name}: "
+              f"{'exact' if not a['mismatched_fields'] else a['mismatched_fields']}")
+    print("\nstraight low->high line (rejected), lambda that reproduces mid:")
+    for name, v in rep["straight_line_lambda_for_mid"].items():
+        print(f"  {name:<26}{'-' if v is None else f'{v:.4f}'}")

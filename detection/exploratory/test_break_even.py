@@ -97,6 +97,16 @@ def test_bootstrap_band_brackets_and_is_reproducible():
     assert c["LB"]["n_not_reached"] == 50 and math.isnan(c["LB"]["lo"])
 
 
+def test_mean_is_primary_and_listed_first():
+    D = 10 * GRID[None, :] - 3 + np.tile([1.0, -1.0], 3)[:, None]
+    out = break_even(GRID, D, 0.0)
+    assert out["primary"] == "lambda_star_mean"
+    assert out["secondary"] == "lambda_star_LB"
+    keys = list(out)
+    assert keys.index("lambda_star_mean") < keys.index("lambda_star_LB")
+    assert list(bootstrap_break_even(GRID, D, 0.0, B=10))[3:] == ["mean", "LB"]
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     for fn in fns:

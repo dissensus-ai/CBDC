@@ -72,8 +72,20 @@ class DGPConfig:
 
     label: str = "default"
 
+    # Exploratory option (E10, Sep 2026). True draws the identity attributes
+    # from their own RNG stream, spawned from the seed, so the behavioural
+    # draws no longer depend on the identity parameters and worlds that differ
+    # only in identity parameters share every transaction at a given seed.
+    # False (default) is the original single-stream generator, byte for byte.
+    identity_rng_stream: bool = False
+
     def to_dict(self):
-        return asdict(self)
+        d = asdict(self)
+        # Omitted when off, so every config serialized before the option
+        # existed (ladder records, run_diagnostics resume checks) still matches.
+        if not d["identity_rng_stream"]:
+            del d["identity_rng_stream"]
+        return d
 
 
 def default_config(seed: int = 20260707) -> DGPConfig:
@@ -323,7 +335,17 @@ def generate(cfg: DGPConfig) -> dict:
     # THE critical line: one shared wallet-count distribution, both classes
     wallet_counts = 1 + rng.binomial(5, cfg.wallet_count_p, size=n)
 
-    kyc, age, sar, juris, wl = _identity_attrs(rng, is_launderer, cfg)
+    if cfg.identity_rng_stream:
+        # A child of the seed's SeedSequence: independent of `rng` (which is
+        # seeded from the root) and a function of the seed alone. The main
+        # stream skips the identity draws, so behaviour at a given seed differs
+        # from the option-off world too -- a different realisation, not the
+        # same world with new attributes.
+        id_rng = np.random.default_rng(
+            np.random.SeedSequence(cfg.seed).spawn(1)[0])
+        kyc, age, sar, juris, wl = _identity_attrs(id_rng, is_launderer, cfg)
+    else:
+        kyc, age, sar, juris, wl = _identity_attrs(rng, is_launderer, cfg)
     entities = pd.DataFrame({
         "entity_id": [f"E{i}" for i in range(n)],
         "is_launderer": is_launderer,

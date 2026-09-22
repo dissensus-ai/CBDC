@@ -1,9 +1,10 @@
-"""Arm A driver: two-stage screening across R independent train/test pairs.
+"""E9 driver: two-stage screening across R independent train/test pairs.
 
-EXPLORATORY. Refuses seeds outside the DEV block 700001-700999 unless an
-addendum lock naming the seed base is supplied (seed_guard). Nothing here is a
-reported result until the protocol addendum fixes seeds, grids and the
-primary gap-recovered estimand.
+EXPLORATORY. Refuses seeds outside the DEV block 700001-700999 unless a valid
+addendum lock for arm E9 is supplied (seed_guard, addendum_lock). Primary cell
+per addendum A0: gboost (M4), stage 2 = T4, full-training-world stage-2 model,
+recovered share as the ratio of replicate means. Stop rule: the run halts if
+more than 10% of replicates fail.
 
     python3 run_two_stage.py --seed-base 700001 --R 3 --n-train 2000 \
         --n-test 2000 --out-dir _dev_smoke/two_stage
@@ -33,12 +34,17 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "confirmatory"))
 
+import addendum_lock  # noqa: E402
 import seed_guard  # noqa: E402
 from _driver_common import MAX_WORKERS, provenance  # noqa: E402
 from inference import mean_ci  # noqa: E402
 from replicate import run_replicate  # noqa: E402
 from two_stage import (DEFAULT_KPRIME_GRID, STAGE2_TIERS,  # noqa: E402
                        TRAIN_VARIANTS, make_hook)
+
+ARM = "E9"
+MODELS = ["gboost", "logit"]   # what run_replicate fits
+STOP_FAIL_RATE = 0.10
 
 
 def _job(a):
@@ -99,7 +105,7 @@ def main(argv=None):
     ap.add_argument("--seed-base", type=int, required=True)
     ap.add_argument("--R", type=int, required=True)
     ap.add_argument("--addendum-lock", default=None)
-    ap.add_argument("--n-train", type=int, default=8000)
+    ap.add_argument("--n-train", type=int, default=10000)
     ap.add_argument("--n-test", type=int, default=10000)
     ap.add_argument("--k-star", type=int, default=500)
     ap.add_argument("--kprime-grid", type=int, nargs="+",
@@ -116,8 +122,10 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     try:
-        mode = seed_guard.check_seeds(args.seed_base, args.R,
-                                      args.addendum_lock)
+        mode = seed_guard.check_seeds(
+            args.seed_base, args.R, args.addendum_lock,
+            lock_spec={"arm": ARM, "grid": args.kprime_grid,
+                       "models": MODELS})
     except seed_guard.SeedGuardError as e:
         print(f"REFUSING TO RUN\n\n{e}", file=sys.stderr)
         sys.exit(2)
@@ -143,32 +151,56 @@ def main(argv=None):
           f"n_train={args.n_train} n_test={args.n_test} k*={args.k_star}",
           flush=True)
 
+    prov = provenance()
+    if mode == "ADDENDUM":
+        # burn before generating anything: a crash still spends the seeds
+        addendum_lock.register_start(ARM, args.seed_base, args.R,
+                                     seed_guard.TEST_SEED_OFFSET,
+                                     os.path.abspath(args.out_dir),
+                                     prov["git_commit"])
+
     t0 = time.time()
     records = []
+    halted = None
+    n_fail = 0
     with ProcessPoolExecutor(max_workers=args.workers) as ex, \
             open(raw_path, "w") as raw:
         futs = [ex.submit(_job, (i, tr, te, kw, hook_kw))
                 for i, (tr, te) in enumerate(seeds)]
         for done, fut in enumerate(as_completed(futs), 1):
+            if fut.cancelled():
+                continue
             rec = fut.result()
             records.append(rec)
             raw.write(json.dumps(rec, default=float) + "\n")
             raw.flush()
             print(f"  [{done}/{len(seeds)}] rep {rec['replicate_id']:>3} "
                   f"{rec['status']:<10} {rec['wall_seconds']:.1f}s", flush=True)
+            n_fail += rec["status"] != "OK"
+            if n_fail > STOP_FAIL_RATE * args.R and halted is None:
+                halted = (f"{n_fail}/{args.R} replicates failed (> "
+                          f"{STOP_FAIL_RATE:.0%}); run halted per addendum A0")
+                print(f"\n** {halted} **\n", flush=True)
+                for f in futs:
+                    f.cancel()
     wall = time.time() - t0
 
     records.sort(key=lambda r: r["replicate_id"])
     ok = [r for r in records if r["status"] == "OK"]
     out = {
-        "arm": "A_two_stage",
+        "arm": ARM,
         "status": "EXPLORATORY",
+        "halted": halted,
+        "primary_cell": {"model": "gboost", "stage2_tier": "T4",
+                         "train_variant": "full",
+                         "recovered_share": "gap_recovered_ratio_of_means"},
+        "R": args.R,
         "seed_mode": mode,
         "seed_base": args.seed_base,
         "test_seed_offset": seed_guard.TEST_SEED_OFFSET,
         "addendum_lock": args.addendum_lock,
         "args": vars(args),
-        "provenance": provenance(),
+        "provenance": prov,
         "stage2_training_default": "full",
         "R_planned": args.R, "R_ok": len(ok),
         "failures": [{k: r.get(k) for k in ("replicate_id", "train_seed",
@@ -180,6 +212,8 @@ def main(argv=None):
     }
     with open(summ_path, "w") as f:
         json.dump(out, f, indent=2, default=float)
+    if mode == "ADDENDUM":
+        addendum_lock.register_complete(args.seed_base)
     print(f"\n{len(ok)}/{len(records)} OK; wall {wall:.1f}s; wrote {summ_path}",
           flush=True)
 

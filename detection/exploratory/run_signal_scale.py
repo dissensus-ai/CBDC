@@ -1,21 +1,24 @@
-"""Arm B driver: T2 -> T4 and T2 -> T3 Delta missed-per-10k along lambda.
+"""E10 driver: T2 -> T4 and T2 -> T3 Delta missed-per-10k along lambda.
 
-EXPLORATORY. Refuses seeds outside the DEV block 700001-700999 unless an
-addendum lock naming the seed base is supplied (seed_guard).
+EXPLORATORY. Refuses seeds outside the DEV block 700001-700999 unless a valid
+addendum lock for arm E10 is supplied (seed_guard, addendum_lock).
 
-For each lambda in the grid and each replicate r, one independent train/test
-pair (train seed = base + r, test seed = base + r + 10000003) is generated at
-identity_signal.lambda_config(lambda) and run through replicate.run_replicate.
-The same seed pair is used at every lambda; under the current generator that
-shares labels and wallet counts across lambda, not transactions
-(identity_signal module docstring).
+For each lambda on the piecewise path (identity_signal) and each replicate r,
+one independent train/test pair (train seed = base + r, test seed = base + r +
+10000003) is generated with identity_rng_stream=True and run through
+replicate.run_replicate; M2 ("additive") is fitted through score_hook. The same
+seed pair is used at every lambda and, with the paired identity stream, the
+worlds share labels, wallets and transactions: Delta(lambda) contrasts are
+paired counterfactuals.
 
-    python3 run_signal_scale.py --seed-base 700001 --R 3 --n-train 2000 \
-        --n-test 2000 --out-dir _dev_smoke/signal_scale
+    python3 run_signal_scale.py --seed-base 700401 --R 3 --n-train 2000 \
+        --n-test 2000 --out-dir _dev_smoke/e10_paired
 
 Writes <out-dir>/signal_scale_replicates.jsonl and signal_scale_summary.json
 (per-lambda t-intervals and break-even estimates per model x contrast x
-threshold). Refuses to overwrite an existing summary.
+threshold; lambda*_mean primary). Stop rule (addendum A0): the run halts if
+more than 10% of the R units at any single lambda fail. Refuses to overwrite
+an existing summary.
 """
 
 from __future__ import annotations
@@ -39,22 +42,28 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.dirname(HERE))
 sys.path.insert(0, os.path.join(os.path.dirname(HERE), "confirmatory"))
 
+import addendum_lock  # noqa: E402
 import seed_guard  # noqa: E402
 from _driver_common import MAX_WORKERS, provenance  # noqa: E402
 from break_even import bootstrap_break_even, break_even  # noqa: E402
 from identity_signal import (DEFAULT_LAMBDA_GRID, cfg_factory,  # noqa: E402
                              lambda_block, mid_position)
+from extra_models import ADDITIVE_MODEL, make_additive_hook  # noqa: E402
 from inference import mean_ci  # noqa: E402
 from replicate import CONTRAST_MODEL, PRIMARY_MODEL, run_replicate  # noqa: E402
 
-MODELS = (PRIMARY_MODEL, CONTRAST_MODEL)
+ARM = "E10"
+MODELS = (PRIMARY_MODEL, CONTRAST_MODEL, ADDITIVE_MODEL)
 CONTRASTS = ("T2_minus_T4", "T2_minus_T3")
+STOP_FAIL_RATE = 0.10
 
 
 def _job(a):
-    j, lam, i, tr, te, kw, b, p = a
+    j, lam, i, tr, te, kw, b, p, additive = a
     t0 = time.time()
-    rec = run_replicate(i, tr, te, cfg_factory=cfg_factory(lam, b, p), **kw)
+    rec = run_replicate(i, tr, te, cfg_factory=cfg_factory(lam, b, p, True),
+                        score_hook=make_additive_hook() if additive else None,
+                        **kw)
     rec["lambda"] = lam
     rec["lambda_index"] = j
     rec["wall_seconds"] = time.time() - t0
@@ -71,9 +80,9 @@ def delta_matrix(records, grid, R, model, contrast):
     return D
 
 
-def summarize(records, grid, R, thresholds, alpha, B, boot_seed):
+def summarize(records, grid, R, thresholds, alpha, B, boot_seed, models):
     out = {}
-    for model in MODELS:
+    for model in models:
         for contrast in CONTRASTS:
             D = delta_matrix(records, grid, R, model, contrast)
             per_lam = [dict(lam=float(lam), **mean_ci(
@@ -95,11 +104,15 @@ def main(argv=None):
     ap.add_argument("--seed-base", type=int, required=True)
     ap.add_argument("--R", type=int, required=True)
     ap.add_argument("--addendum-lock", default=None)
-    ap.add_argument("--n-train", type=int, default=8000)
+    ap.add_argument("--n-train", type=int, default=10000)
     ap.add_argument("--n-test", type=int, default=10000)
     ap.add_argument("--k-star", type=int, default=500)
     ap.add_argument("--lambda-grid", type=float, nargs="+",
                     default=list(DEFAULT_LAMBDA_GRID))
+    ap.add_argument("--models", nargs="+", default=list(MODELS),
+                    choices=list(MODELS),
+                    help="gboost and logit are always fitted by run_replicate;"
+                         " dropping 'additive' skips M2")
     ap.add_argument("--b", default="mid", choices=["low", "mid", "high"])
     ap.add_argument("--prevalence", type=float, default=0.05)
     ap.add_argument("--thresholds", type=float, nargs="+", default=[0.0, 1.0])
@@ -111,9 +124,14 @@ def main(argv=None):
     ap.add_argument("--out-dir", required=True)
     args = ap.parse_args(argv)
 
+    for m in (PRIMARY_MODEL, CONTRAST_MODEL):
+        if m not in args.models:
+            sys.exit(f"{m} is always fitted and must be listed in --models")
+    models = [m for m in MODELS if m in args.models]
     try:
-        mode = seed_guard.check_seeds(args.seed_base, args.R,
-                                      args.addendum_lock)
+        mode = seed_guard.check_seeds(
+            args.seed_base, args.R, args.addendum_lock,
+            lock_spec={"arm": ARM, "grid": args.lambda_grid, "models": models})
     except seed_guard.SeedGuardError as e:
         print(f"REFUSING TO RUN\n\n{e}", file=sys.stderr)
         sys.exit(2)
@@ -135,18 +153,30 @@ def main(argv=None):
 
     seeds = seed_guard.replicate_seeds(args.seed_base, args.R)
     kw = dict(n_train=args.n_train, n_test=args.n_test, k_star=args.k_star)
-    units = [(j, lam, i, tr, te, kw, args.b, args.prevalence)
+    additive = ADDITIVE_MODEL in models
+    units = [(j, lam, i, tr, te, kw, args.b, args.prevalence, additive)
              for j, lam in enumerate(grid) for i, (tr, te) in enumerate(seeds)]
+    prov = provenance()
+    if mode == "ADDENDUM":
+        # burn before generating anything: a crash still spends the seeds
+        addendum_lock.register_start(ARM, args.seed_base, args.R,
+                                     seed_guard.TEST_SEED_OFFSET,
+                                     os.path.abspath(args.out_dir),
+                                     prov["git_commit"])
     print(f"signal scale [{mode} seeds] R={args.R} x {len(grid)} lambda = "
           f"{len(units)} units, n_train={args.n_train} n_test={args.n_test} "
           f"k*={args.k_star}", flush=True)
 
     t0 = time.time()
     records = []
+    halted = None
+    fails_at = [0] * len(grid)
     with ProcessPoolExecutor(max_workers=args.workers) as ex, \
             open(raw_path, "w") as raw:
         futs = [ex.submit(_job, u) for u in units]
         for done, fut in enumerate(as_completed(futs), 1):
+            if fut.cancelled():
+                continue
             rec = fut.result()
             records.append(rec)
             raw.write(json.dumps(rec, default=float) + "\n")
@@ -154,18 +184,35 @@ def main(argv=None):
             print(f"  [{done}/{len(units)}] lambda={rec['lambda']:<5g} rep "
                   f"{rec['replicate_id']:>3} {rec['status']:<10} "
                   f"{rec['wall_seconds']:.1f}s", flush=True)
+            if rec["status"] != "OK":
+                fails_at[rec["lambda_index"]] += 1
+                j = rec["lambda_index"]
+                if fails_at[j] > STOP_FAIL_RATE * args.R and halted is None:
+                    halted = (f"lambda={grid[j]:g}: {fails_at[j]}/{args.R} "
+                              f"units failed (> {STOP_FAIL_RATE:.0%}); run "
+                              f"halted per addendum A0 stop rule")
+                    print(f"\n** {halted} **\n", flush=True)
+                    for f in futs:
+                        f.cancel()
     wall = time.time() - t0
 
     records.sort(key=lambda r: (r["lambda_index"], r["replicate_id"]))
     out = {
-        "arm": "B_signal_scale",
+        "arm": ARM,
         "status": "EXPLORATORY",
+        "halted": halted,
+        "primary_estimand": "lambda_star_mean",
+        "secondary_estimand": "lambda_star_LB",
+        "path": "piecewise: [0,1] s=low->mid, [1,2] s=mid->high; kink at 1",
+        "identity_rng_stream": True,
+        "models": models,
+        "R": args.R,
         "seed_mode": mode,
         "seed_base": args.seed_base,
         "test_seed_offset": seed_guard.TEST_SEED_OFFSET,
         "addendum_lock": args.addendum_lock,
         "args": vars(args),
-        "provenance": provenance(),
+        "provenance": prov,
         "lambda_grid": grid,
         "mid_position": mid_position(),
         "n_units": len(units),
@@ -176,11 +223,14 @@ def main(argv=None):
                      for r in records if r["status"] != "OK"],
         "wall_seconds_total": wall,
         "wall_seconds_per_unit": [r["wall_seconds"] for r in records],
+        "failures_per_lambda": dict(zip((f"{g:g}" for g in grid), fails_at)),
         "results": summarize(records, grid, args.R, args.thresholds,
-                             args.alpha, args.bootstrap_B, boot_seed),
+                             args.alpha, args.bootstrap_B, boot_seed, models),
     }
     with open(summ_path, "w") as f:
         json.dump(out, f, indent=2, default=float)
+    if mode == "ADDENDUM":
+        addendum_lock.register_complete(args.seed_base)
     print(f"\n{out['n_ok']}/{len(units)} OK; wall {wall:.1f}s; wrote "
           f"{summ_path}", flush=True)
 

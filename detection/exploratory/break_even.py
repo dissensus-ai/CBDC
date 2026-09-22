@@ -3,18 +3,18 @@ demonstrably reduces misses by more than a threshold. Pure functions, no I/O.
 
 Input is a replicate x grid matrix D[r, j] = Delta missed-per-10k (T2 minus
 T4, or T2 minus T3; positive = identity helps) for replicate r at lambda_j,
-NaN where that replicate failed. Two estimands are computed; which one a
-reported run uses is for the addendum to fix, not for this code.
+NaN where that replicate failed. Two estimands are computed. The addendum
+(E10, amendment A0) fixes lambda*_mean as PRIMARY and lambda*_LB as secondary.
 
-lambda*_LB   first lambda at which the lower endpoint of the two-sided
-             (1-alpha) Student-t interval for mean Delta exceeds tau --
-             "demonstrably above tau". This DEPENDS ON R: with more
-             replicates the interval tightens and lambda*_LB moves down
-             toward lambda*_mean. It is a detection threshold for a given
-             design, not a property of the generator alone.
+lambda*_mean PRIMARY. First lambda at which mean Delta exceeds tau. Estimates
+             a property of the generator; carries no "demonstrably" claim.
+             Its uncertainty is the bootstrap band.
 
-lambda*_mean first lambda at which mean Delta itself exceeds tau. Estimates a
-             generator property; carries no "demonstrably" claim.
+lambda*_LB   secondary. First lambda at which the lower endpoint of the
+             two-sided (1-alpha) Student-t interval for mean Delta exceeds
+             tau. This DEPENDS ON R: with more replicates the interval
+             tightens and lambda*_LB moves down toward lambda*_mean. It is a
+             detection threshold for a given design, reported, not headlined.
 
 Both use linear interpolation between the bracketing grid points on the
 relevant curve (lower bound or mean). Censoring is reported, never filled:
@@ -100,8 +100,9 @@ def first_crossing(grid, curve, tau):
 def break_even(grid, D, tau, alpha=0.10):
     """Both estimands on one replicate x grid matrix."""
     cs = curve_stats(D, alpha)
-    out = {"tau": tau, "alpha": alpha}
-    for name, curve in (("LB", cs["ci_lo"]), ("mean", cs["mean"])):
+    out = {"tau": tau, "alpha": alpha, "primary": "lambda_star_mean",
+           "secondary": "lambda_star_LB"}
+    for name, curve in (("mean", cs["mean"]), ("LB", cs["ci_lo"])):
         v, flag, rec = first_crossing(grid, curve, tau)
         out[f"lambda_star_{name}"] = v
         out[f"flag_{name}"] = flag
@@ -122,20 +123,20 @@ def bootstrap_break_even(grid, D, tau, alpha=0.10, B=2000, seed=0,
     D = np.asarray(D, dtype=float)
     rng = np.random.default_rng(seed)
     R = D.shape[0]
-    draws = {"LB": [], "mean": []}
-    flags = {"LB": {"left_censored": 0, "not_reached": 0},
-             "mean": {"left_censored": 0, "not_reached": 0}}
+    draws = {"mean": [], "LB": []}
+    flags = {"mean": {"left_censored": 0, "not_reached": 0},
+             "LB": {"left_censored": 0, "not_reached": 0}}
     for _ in range(B):
         idx = rng.integers(0, R, size=R)
         cs = curve_stats(D[idx], alpha)
-        for name, curve in (("LB", cs["ci_lo"]), ("mean", cs["mean"])):
+        for name, curve in (("mean", cs["mean"]), ("LB", cs["ci_lo"])):
             v, flag, _ = first_crossing(grid, curve, tau)
             if flag:
                 flags[name][flag] += 1
             draws[name].append(v)
     q = ((1 - level) / 2, 1 - (1 - level) / 2)
     out = {"B": B, "seed": seed, "level": level}
-    for name in ("LB", "mean"):
+    for name in ("mean", "LB"):
         x = np.asarray(draws[name], dtype=float)
         fin = x[~np.isnan(x)]
         out[name] = {

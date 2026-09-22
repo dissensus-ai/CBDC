@@ -4,9 +4,12 @@ These drivers have no protocol lock of their own yet. Until an addendum fixes
 the reported seeds, they may run ONLY on the development block 700001-700999,
 and every seed they would touch must be disjoint from every seed already spent
 elsewhere in this repository. A seed base outside the DEV block is accepted
-only with `--addendum-lock <path>`: the file must exist and must contain the
-seed base as a literal token. That is a tripwire, not a freeze -- the real
-lock format belongs to the addendum, which does not exist yet.
+only with `--addendum-lock <path>`, validated by addendum_lock.validate: the
+lock must match this run's arm, seed base, R, grid and models exactly, its
+protocol file and freeze commit must check out, and neither the spent-seed
+registry nor any result file in the repository may already record a seed in
+the run's train or test block. A lock naming a DEV-block base is refused: DEV
+seeds are never reportable.
 
 Why refuse rather than warn: a dev run on a confirmatory seed burns that seed
 (protocol 6.1 step 3), and nothing downstream can tell a burned seed from a
@@ -16,7 +19,9 @@ fresh one. The check has to happen before any world is generated.
 from __future__ import annotations
 
 import os
-import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 DEV_SEED_MIN = 700_001
 DEV_SEED_MAX = 700_999
@@ -57,18 +62,15 @@ def replicate_seeds(seed_base: int, R: int) -> list[tuple[int, int]]:
             for i in range(R)]
 
 
-def _lock_names_base(path: str, seed_base: int) -> bool:
-    with open(path) as f:
-        text = f.read()
-    return re.search(rf"(?<!\d){int(seed_base)}(?!\d)", text) is not None
-
-
-def check_seeds(seed_base: int, R: int, addendum_lock: str | None = None) -> str:
+def check_seeds(seed_base: int, R: int, addendum_lock: str | None = None,
+                lock_spec: dict | None = None, *, root=None,
+                registry=None) -> str:
     """Raise SeedGuardError unless this run may use these seeds.
 
     Returns "DEV" or "ADDENDUM" for the output record. The whole train block
     seed_base..seed_base+R-1 must sit inside the DEV range, not just its first
-    seed, or a large R would walk out of the block unnoticed.
+    seed, or a large R would walk out of the block unnoticed. `lock_spec` =
+    {"arm", "grid", "models"} of the run, required with a lock.
     """
     if not isinstance(seed_base, int) or isinstance(seed_base, bool):
         raise SeedGuardError(f"seed base must be an int, got {seed_base!r}")
@@ -77,22 +79,22 @@ def check_seeds(seed_base: int, R: int, addendum_lock: str | None = None) -> str
 
     last = seed_base + R - 1
     in_dev = DEV_SEED_MIN <= seed_base and last <= DEV_SEED_MAX
-    if in_dev:
-        mode = "DEV"
-    elif addendum_lock is None:
-        raise SeedGuardError(
-            f"seed block {seed_base}..{last} is outside the DEV range "
-            f"{DEV_SEED_MIN}-{DEV_SEED_MAX}. Non-dev seeds need "
-            f"--addendum-lock <path> naming this seed base.")
-    else:
-        if not os.path.isfile(addendum_lock):
-            raise SeedGuardError(f"addendum lock {addendum_lock} does not exist")
-        if not _lock_names_base(addendum_lock, seed_base):
+    touches_dev = seed_base <= DEV_SEED_MAX and last >= DEV_SEED_MIN
+    if addendum_lock is None:
+        if not in_dev:
             raise SeedGuardError(
-                f"addendum lock {addendum_lock} does not contain seed base "
-                f"{seed_base}")
+                f"seed block {seed_base}..{last} is outside the DEV range "
+                f"{DEV_SEED_MIN}-{DEV_SEED_MAX}. Non-dev seeds need "
+                f"--addendum-lock <path>.")
+        mode = "DEV"
+    else:
+        if touches_dev:
+            raise SeedGuardError("a locked run may not use DEV-block seeds; "
+                                 "they are burned and never reportable")
         mode = "ADDENDUM"
 
+    # range and forbidden-block checks first: cheap, and a lock cannot
+    # override them
     for tr, te in replicate_seeds(seed_base, R):
         for s in (tr, te):
             if s < 0 or s > SKLEARN_SEED_MAX:
@@ -106,4 +108,17 @@ def check_seeds(seed_base: int, R: int, addendum_lock: str | None = None) -> str
                     raise SeedGuardError(
                         f"seed {s} collides with already-used seeds "
                         f"{lo}..{hi} ({why})")
+
+    if mode == "ADDENDUM":
+        import addendum_lock as al
+        spec = lock_spec or {}
+        if not {"arm", "grid", "models"} <= set(spec):
+            raise SeedGuardError("a locked run must state arm, grid and models")
+        try:
+            al.validate(addendum_lock, arm=spec["arm"], seed_base=seed_base,
+                        R=R, grid=spec["grid"], models=spec["models"],
+                        offset=TEST_SEED_OFFSET, root=root,
+                        registry=registry or al.REGISTRY)
+        except al.AddendumLockError as e:
+            raise SeedGuardError(f"addendum lock refused: {e}") from e
     return mode
